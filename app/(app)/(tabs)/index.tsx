@@ -1,109 +1,125 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import {View, Text, ScrollView, TouchableOpacity, StatusBar} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import VideoPlayer from "../../components/videoplayer";
-import EventCarousal from "../../components/EventCarousal";
-import SidebarWithTopMenu from "@/components/SideDrawerWithTopBar";
+import EventCarousal from "../../../components/EventCarousal";
+import React from "react";
+import {SafeAreaView} from "react-native";
+import HomeHeader from "@/components/HomeHeader";
+import DevotionCard from "@/components/DevotionCard";
+import { useUser } from '../../../contexts/UserContext';
+// import SidebarWithTopMenu from "@/components/SideDrawerWithTopBar";
 
 export default function Index() {
     const router = useRouter();
+    const { userDetails } = useUser();
 
     return (
-        <>
-            <SidebarWithTopMenu>
-            <ScrollView className="flex-1 bg-white">
-                {/* Colorful Banner */}
-                {/*<LinearGradient*/}
-                {/*    colors={['#7c3aed', '#3b82f6']} // purple-600 to blue-500*/}
-                {/*    start={{ x: 0, y: 0 }}*/}
-                {/*    end={{ x: 1, y: 0 }}*/}
-                {/*    className="p-5 rounded-xl mb-6 shadow-lg"*/}
-                {/*>*/}
-                {/*    <Text className="text-white text-xl font-bold mb-2">Upcoming Event</Text>*/}
-                {/*    <Text className="text-white">All Praise Service with Pastor Chris </Text>*/}
-                {/*</LinearGradient>*/}
-                <EventCarousal/>
+        <SafeAreaView className="flex-1 mb-[75px] bg-gray-50">
+            <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" />
+            {/*<SidebarWithTopMenu>*/}
+                <ScrollView className="flex-1 w-screen bg-gradient-to-b  from-slate-50 to-white">
+                    {/* Hero Section with Welcome Message */}
+                    <HomeHeader name={userDetails?.firstName}/>
+                    <DevotionCard/>
 
-                {/* Feature Buttons */}
-                <View className="flex-row px-4 flex-wrap justify-between mb-0">
-                    <TouchableOpacity
-                        className="bg-primary p-4 rounded-lg w-[48%] mb-3 items-center"
-                        onPress={() => router.push('/getStarted/signin')}
-                    >
-                        <MaterialIcons name="school" size={24} color="#fff" />
-                        <Text className="text-center text-white mt-2 text-sm">Online Class</Text>
-                    </TouchableOpacity>
+                    {/* Main Feature Grid */}
+                    <View className="px-4 mt-6">
+                        <Text className="text-2xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'System' }}>
+                            Quick Actions
+                        </Text>
 
-                    <TouchableOpacity
-                        className="bg-primary p-4 rounded-lg w-[48%] mb-3 items-center"
-                        onPress={() => router.push('/getStarted/welcome')}
-                    >
-                        <MaterialIcons name="tv" size={24} color="#fff" />
-                        <Text className="text-center text-white mt-2 text-sm">Watch Live TV</Text>
-                    </TouchableOpacity>
+                        <View className="flex-row flex-wrap justify-between">
+                            {/*<TouchableOpacity*/}
+                            {/*    className="bg-white border border-blue-100 p-6 rounded-2xl w-[48%] mb-4 shadow-md"*/}
+                            {/*    onPress={() => router.push('/getStarted/signin')}*/}
+                            {/*    style={{*/}
+                            {/*        shadowColor: '#3b82f6',*/}
+                            {/*        shadowOffset: { width: 0, height: 4 },*/}
+                            {/*        shadowOpacity: 0.1,*/}
+                            {/*        shadowRadius: 8*/}
+                            {/*    }}*/}
+                            {/*>*/}
+                            {/*    <View className="bg-blue-500 w-12 h-12 rounded-xl items-center justify-center mb-3">*/}
+                            {/*        <MaterialIcons name="school" size={24} color="#fff" />*/}
+                            {/*    </View>*/}
+                            {/*    <Text className="text-gray-800 font-semibold text-base mb-1" style={{ fontFamily: 'System' }}>*/}
+                            {/*        Online Classes*/}
+                            {/*    </Text>*/}
+                            {/*    <Text className="text-gray-500 text-sm" style={{ fontFamily: 'System' }}>*/}
+                            {/*        Join interactive lessons*/}
+                            {/*    </Text>*/}
+                            {/*</TouchableOpacity>*/}
+                        
+                            <TouchableOpacity
+                                className="bg-white border border-purple-100 p-6 rounded-2xl w-[48%] mb-4 shadow-md"
+                                onPress={() => router.push('/livetv')}
+                                style={{
+                                    shadowColor: '#8b5cf6',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.1,
+                                    shadowRadius: 8
+                                }}
+                            >
+                                <View className="bg-purple-500 w-12 h-12 rounded-xl items-center justify-center mb-3">
+                                    <MaterialIcons name="tv" size={24} color="#fff" />
+                                </View>
+                                <Text className="text-gray-800 font-semibold text-base mb-1" style={{ fontFamily: 'System' }}>
+                                    Live TV
+                                </Text>
+                                <Text className="text-gray-500 text-sm" style={{ fontFamily: 'System' }}>
+                                    Watch services live
+                                </Text>
+                            </TouchableOpacity>
+                        
+                            {/*<TouchableOpacity*/}
+                            {/*    className="bg-white border border-green-100 p-6 rounded-2xl w-[48%] mb-4 shadow-md"*/}
+                            {/*    onPress={() => router.push('/getStarted/signup')}*/}
+                            {/*    style={{*/}
+                            {/*        shadowColor: '#10b981',*/}
+                            {/*        shadowOffset: { width: 0, height: 4 },*/}
+                            {/*        shadowOpacity: 0.1,*/}
+                            {/*        shadowRadius: 8*/}
+                            {/*    }}*/}
+                            {/*>*/}
+                            {/*    <View className="bg-green-500 w-12 h-12 rounded-xl items-center justify-center mb-3">*/}
+                            {/*        <MaterialIcons name="record-voice-over" size={24} color="#fff" />*/}
+                            {/*    </View>*/}
+                            {/*    <Text className="text-gray-800 font-semibold text-base mb-1" style={{ fontFamily: 'System' }}>*/}
+                            {/*        Testimonies*/}
+                            {/*    </Text>*/}
+                            {/*    <Text className="text-gray-500 text-sm" style={{ fontFamily: 'System' }}>*/}
+                            {/*        Listen to Inspiring Testimonies*/}
+                            {/*    </Text>*/}
+                            {/*</TouchableOpacity>*/}
+                        
+                            <TouchableOpacity
+                                className="bg-white border bg-gray-400 border-orange-100 p-6 rounded-2xl w-[48%] mb-4 shadow-md"
+                                onPress={() => router.push('/store')}
+                                style={{
+                                    shadowColor: '#f97316',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.1,
+                                    shadowRadius: 8
+                                }}
+                            >
+                                <View className="bg-orange-500 w-12 h-12 rounded-xl items-center justify-center mb-3">
+                                    <MaterialIcons name="storefront" size={24} color="#fff" />
+                                </View>
+                                <Text className="text-gray-800 font-semibold text-base mb-1" style={{ fontFamily: 'System' }}>
+                                    Store
+                                </Text>
+                                <Text className="text-gray-500 text-sm" style={{ fontFamily: 'System' }}>
+                                    Browse resources
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
 
-                    <TouchableOpacity
-                        className="bg-primary p-4 rounded-lg w-[48%] mb-3 items-center"
-                        onPress={() => router.push('/getStarted/signup')}
-                    >
-                        <MaterialIcons name="record-voice-over" size={24} color="#fff" />
-                        <Text className="text-center text-white mt-2 text-sm">Submit Testimony</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        className="bg-primary p-4 rounded-lg w-[48%] mb-3 items-center"
-                        onPress={() => router.push('/store')}
-                    >
-                        <MaterialIcons name="storefront" size={24} color="#fff" />
-                        <Text className="text-center text-white mt-2 text-sm">Visit Store</Text>
-                    </TouchableOpacity>
-                </View>
-
-
-                {/*<View style={{ flex: 1, backgroundColor: '#fff', padding: 16 }}>*/}
-                {/*    <Text className="text-xl font-bold">*/}
-                {/*        Loveworld Foundation School Promo*/}
-                {/*    </Text>*/}
-                {/*    <VideoPlayer*/}
-                {/*        // title="Welcome Video"*/}
-                {/*        videoSource="https://res.cloudinary.com/dfi8bpolg/video/upload/v1737680677/evtznnwqnmgyshvhzidd.mp4"*/}
-                {/*    />*/}
-                {/*</View>*/}
-
-
-
-                {/* Testimonies */}
-                <Text className="text-lg font-semibold px-4 mb-2">Recent Testimonies</Text>
-                <ScrollView horizontal className="px-4 mb-6" showsHorizontalScrollIndicator={false}>
-                    {[...Array(4)].map((_, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            className="w-32 bg-gray-200 mr-3 rounded-lg p-2 items-center"
-                            onPress={() => router.push('/testimony/testimony')}
-                        >
-                            <View className="w-full h-20 bg-gray-400 rounded-md mb-2" />
-                            <Text className="text-sm font-medium">Testimony {index + 1}</Text>
-                            <View className="h-2 bg-gray-300 w-3/4 rounded-full mt-1" />
-                        </TouchableOpacity>
-                    ))}
+                    </View>
+                     {/*Event Carousel*/}
+                        <EventCarousal />
                 </ScrollView>
-
-                {/* Quick Links */}
-                <Text className="text-lg font-semibold px-4 mb-2">Quick Links</Text>
-                <View className="flex-row justify-between">
-                    <TouchableOpacity className="bg-gray-100 p-4 w-[48%] rounded-lg items-center">
-                        <Ionicons name="book-outline" size={20} />
-                        <Text>Foundation</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity className="bg-gray-100 p-4 w-[48%] rounded-lg items-center">
-                        <Ionicons name="calendar-outline" size={20} />
-                        <Text>Events</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-            </SidebarWithTopMenu>
-        </>
-
+            {/*</SidebarWithTopMenu>*/}
+        </SafeAreaView>
     );
 }
