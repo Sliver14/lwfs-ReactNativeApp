@@ -68,19 +68,19 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                         {product.description}
                     </Text>
 
-                    <View className="flex-row items-center mb-6 gap-4">
-                        <View className="flex-row gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                                <AntDesign
-                                    key={i}
-                                    name="star"
-                                    size={16}
-                                    color={i < 4 ? "#FFA500" : "#D1D5DB"}
-                                />
-                            ))}
-                        </View>
-                        <Text className="text-gray-500 text-sm">4.2 (124 reviews)</Text>
-                    </View>
+                    {/*<View className="flex-row items-center mb-6 gap-4">*/}
+                    {/*    <View className="flex-row gap-0.5">*/}
+                    {/*        {[...Array(5)].map((_, i) => (*/}
+                    {/*            <AntDesign*/}
+                    {/*                key={i}*/}
+                    {/*                name="star"*/}
+                    {/*                size={16}*/}
+                    {/*                color={i < 4 ? "#FFA500" : "#D1D5DB"}*/}
+                    {/*            />*/}
+                    {/*        ))}*/}
+                    {/*    </View>*/}
+                    {/*    <Text className="text-gray-500 text-sm">4.2 (124 reviews)</Text>*/}
+                    {/*</View>*/}
 
                     <Button onPress={() => onAddToCart(product)}>
                         Add to Cart
@@ -88,21 +88,21 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                 </View>
             </Card>
 
-            <View className="p-6">
-                <Text className="text-lg font-bold text-gray-800 mb-4">Customer Reviews</Text>
-                <ReviewCard
-                    name="Sarah M."
-                    rating={5}
-                    review="Excellent quality and fast shipping. Highly recommended!"
-                    date="2 weeks ago"
-                />
-                <ReviewCard
-                    name="John D."
-                    rating={4}
-                    review="Great product, exactly as described. Very satisfied with my purchase."
-                    date="1 month ago"
-                />
-            </View>
+            {/*<View className="p-6">*/}
+            {/*    <Text className="text-lg font-bold text-gray-800 mb-4">Customer Reviews</Text>*/}
+            {/*    <ReviewCard*/}
+            {/*        name="Sarah M."*/}
+            {/*        rating={5}*/}
+            {/*        review="Excellent quality and fast shipping. Highly recommended!"*/}
+            {/*        date="2 weeks ago"*/}
+            {/*    />*/}
+            {/*    <ReviewCard*/}
+            {/*        name="John D."*/}
+            {/*        rating={4}*/}
+            {/*        review="Great product, exactly as described. Very satisfied with my purchase."*/}
+            {/*        date="1 month ago"*/}
+            {/*    />*/}
+            {/*</View>*/}
         </ScrollView>
     );
 };

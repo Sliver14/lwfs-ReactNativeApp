@@ -81,21 +81,6 @@ const Welcome = () => {
 
                 {/* Buttons */}
                 <View style={{ marginTop: 48, width: '100%', gap: 16 }}>
-                    <TouchableOpacity
-                        onPress={() => router.push('/(auth)/signin')}
-                        style={{
-                            backgroundColor: '#fff',
-                            paddingVertical: 12,
-                            borderRadius: 999,
-                            alignItems: 'center',
-                            width: 320,
-                            alignSelf: 'center',
-                        }}
-                    >
-                        <Text style={{ color: '#000', fontSize: 18, fontWeight: 'bold' }}>
-                            Login
-                        </Text>
-                    </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={() => router.push('/(auth)/signup')}
@@ -110,6 +95,22 @@ const Welcome = () => {
                     >
                         <Text style={{ color: '#312e81', fontSize: 18, fontWeight: 'bold' }}>
                             Sign-up
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={() => router.push('/(auth)/signin')}
+                        style={{
+                            backgroundColor: '#fff',
+                            paddingVertical: 12,
+                            borderRadius: 999,
+                            alignItems: 'center',
+                            width: 320,
+                            alignSelf: 'center',
+                        }}
+                    >
+                        <Text style={{ color: '#000', fontSize: 18, fontWeight: 'bold' }}>
+                            Login
                         </Text>
                     </TouchableOpacity>
                 </View>

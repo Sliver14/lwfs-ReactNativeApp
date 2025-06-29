@@ -1,10 +1,9 @@
 // components/store/ProductCard.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
-import { Card } from '../shared/Card';
+import React from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { Product } from '../../types';
-import {Image} from "react-native";
+import { Card } from '../shared/Card';
 
 interface ProductCardProps {
     product: Product;
@@ -42,9 +41,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAd
                 {/*    {product.description}*/}
                 {/*</Text>*/}
                 <View className="flex-row justify-between items-center">
-                    <Text className="font-bold text-blue-500 text-sm">{product.price} Espees</Text>
+                    <Text className="font-bold text-sm">{product.price} Espees</Text>
                     <TouchableOpacity
-                        className="bg-blue-500 px-3 py-1 rounded-lg"
+                        className="bg-[#453ace] px-3 py-1 rounded-full"
                         onPress={(e) => {
                             e.stopPropagation();
                             onAddToCart(product);

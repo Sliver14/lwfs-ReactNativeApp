@@ -3,12 +3,13 @@ require('dotenv').config();
 
 export default {
     expo: {
-        name: "lwfs_app",
-        slug: "lwfs_app",
+        name: "Loveworld Foundation School",
+        slug: "Loveworld-Foundation-School",
         version: "1.0.0",
         orientation: "portrait",
         icon: "./assets/images/icon.png",
-        scheme: "lwfsapp",
+        scheme: "Loveworld Foundation School",
+        deepLinking: true,
         userInterfaceStyle: "automatic",
         newArchEnabled: true,
         ios: {
@@ -16,7 +17,7 @@ export default {
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: "./assets/images/adaptive-icon.png",
+                foregroundImage: "./assets/images/icon.png",
                 backgroundColor: "#ffffff"
             },
             edgeToEdgeEnabled: true,
@@ -25,7 +26,7 @@ export default {
         web: {
             bundler: "metro",
             output: "static",
-            favicon: "./assets/images/favicon.png"
+            favicon: "./assets/images/icon.png"
         },
         plugins: [
             "expo-router",
@@ -33,7 +34,7 @@ export default {
             [
                 "expo-splash-screen",
                 {
-                    image: "./assets/images/splash-icon.png",
+                    image: "./assets/images/icon.png",
                     imageWidth: 200,
                     resizeMode: "contain",
                     backgroundColor: "#ffffff"
@@ -47,7 +48,10 @@ export default {
         },
         extra: {
             API_URL: process.env.API_URL,
-            APP_NAME: process.env.APP_NAME
+            APP_NAME: process.env.APP_NAME,
+            eas: {
+                projectId: "d8b0d498-7935-4f85-ae24-7deac0b03abf"
+            }
         }
     }
 };

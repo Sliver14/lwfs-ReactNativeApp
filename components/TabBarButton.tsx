@@ -38,9 +38,9 @@ const TabBarButton = ({
             style={styles.tabbarItem}
         >
             {icon[routeName]({
-                color: isFocused ? "#673ab7" : "#222"
+                color: isFocused ? "#453ace" : "#222"
             })}
-            <Text style={{ color: isFocused ? "#673ab7" : "#222" }}>
+            <Text style={{ color: isFocused ? "#453ace" : "#222" }}>
                 {label}
             </Text>
         </Pressable>

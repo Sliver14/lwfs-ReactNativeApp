@@ -1,16 +1,18 @@
 // App.tsx
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StatusBar, ScrollView, View, Text, ActivityIndicator, Animated } from 'react-native';
-import { StoreHeader } from '@/components/store/StoreHeader';
-import { ProductCard } from '@/components/store/ProductCard';
-import { StoreSearch } from '@/components/store/StoreSearch';
-import { ProductDetail } from '@/components/products/ProductDetail';
 import { CartScreen } from '@/components/cart/CartScreen';
-import { Product, CartItem, ViewType } from './types';
-import { useUserCart } from '@/contexts/UserCartContext'
-import { useUser } from '@/contexts/UserContext'
-import axios from 'axios';
+import { ProductDetail } from '@/components/products/ProductDetail';
+import { ProductCard } from '@/components/store/ProductCard';
+import { StoreHeader } from '@/components/store/StoreHeader';
+import { StoreSearch } from '@/components/store/StoreSearch';
+import { useUserCart } from '@/contexts/UserCartContext';
+import { useUser } from '@/contexts/UserContext';
 import { API_URL } from '@/utils/env';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Animated, SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Product, ViewType } from './types';
 
 
 // Loading Component
@@ -119,17 +121,25 @@ const EnhancedStoreApp: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loading2, setLoading2] = useState(false)
     const [error, setError] = useState<string | null>(null);
+
     const { cart } = useUserCart();
-    const { fetchCart } = useUserCart();
-    const { userId } = useUser();
+    // console.log("Cart List for User: ", cart.cartItems);
+    // const { fetchUserCart } = useUserCart();
+    const { userId, userDetails } = useUser();
+    const router = useRouter();
+    const LineSeparator = () => (
+    <View style={{ height: 1, backgroundColor: '#ccc', marginVertical: 10 }} />
+    );
+
     const fetchProducts = async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get(`${API_URL}/products/productlist`);
-            setProducts(response.data.data);
-            // console.log('Products loaded:', response.data.data);
+            const response = await axios.get(`${API_URL}/store/products`);
+            setProducts(response.data);
+            // console.log('Products loaded:', response.data);
         } catch (error) {
             console.error('Error fetching products:', error);
             setError('Failed to load products');
@@ -148,39 +158,82 @@ const EnhancedStoreApp: React.FC = () => {
         fetchProducts();
     }, []);
 
+    const totalCartPrice:number =
+        cart?.cartItems?.reduce((acc, item) => {
+        return acc + (item.product?.price || 0) * item.quantity;
+    }, 0) || 0;
+
+    const narration: string = cart?.cartItems?.map(item => {
+        const name = item.product?.name || "Item";
+        const qty = item.quantity || 0;
+        return `${qty}x ${name}`;
+        }).join(", ") || "";
 
 
-    const addToCart = async (product: Product) => {
-        try {
-            const response = await axios.post(`${API_URL}/cart/add`, {
-                userId,
-                productId: product.id,
-                quantity: 1,
-            });
+    const onCheckout = async () => {
+        console.log(totalCartPrice)
+        console.log(narration)
+        setLoading2(true);
 
-            if (response.status === 200) {
-                await fetchCart(); // Refresh context and trigger useEffect that updates cartItems
+        if (totalCartPrice > 0) {
+            try{
+                const success_url = "lwfsapp://payment-success";
+                // const success_url = "https://lwfs-homepage.vercel.app";
+                // const fail_url = "https://lwfs-homepage.vercel.app/login";
+                const fail_url = "lwfsapp://payment-failed";
+
+            const response = await axios.post(`${API_URL}/cart/checkout`, {
+                narration,
+                price: totalCartPrice,
+                success_url,
+                fail_url,
+                "user_data": {
+                "userId": userId,
+                "firstName": userDetails?.firstName,
+                "lastName": userDetails?.lastName,
+                }
             }
-        } catch (error) {
-            console.error('Error adding product to cart:', error);
+
+        );
+            const paymentRef: string = response.data.payment_ref;
+            console.log("paymentRef:", paymentRef)
+            // localStorage.setItem(paymentRef, paymentRef)
+            if (paymentRef){
+                await WebBrowser.openBrowserAsync(`https://payment.espees.org/pay/${paymentRef}`)
+            }
+
+        }catch(error){
+           if (axios.isAxiosError(error)) {
+                console.log("Status:", error.response?.status);
+                console.log("Message:", error.response?.data);
+            } else {
+                console.error("Unexpected error:", error);
+            }
+        }finally{
+            setLoading2(false);
         }
-    };
+        }
+
+    }
+
+    const { addToCart } = useUserCart();
+    const { fetchUserCart } = useUserCart();
 
     const updateCartQuantity = async (id: number, newQuantity: number) => {
         try {
             if (newQuantity <= 0) {
-                await axios.delete(`${API_URL}/cart/remove`, {
+                await axios.patch(`${API_URL}/cart/decrease`, {
                     data: { productId: id },
                 });
             } else {
-                await axios.put(`${API_URL}/cart/add`, {
+                await axios.patch(`${API_URL}/cart/increase`, {
                     userId,
                     productId: id,
                     quantity: newQuantity,
                 });
             }
 
-            await fetchCart(); // Refresh cart from DB
+            await fetchUserCart(); // Refresh cart from DB
         } catch (error) {
             console.error('Failed to update cart quantity:', error);
         }
@@ -190,6 +243,7 @@ const EnhancedStoreApp: React.FC = () => {
     const cartCount = Array.isArray(cart.cartItems)
         ? cart.cartItems.reduce((sum, item) => sum + item.quantity, 0)
         : 0;
+
 
     const renderCurrentView = () => {
         // Show loading screen when fetching products
@@ -201,17 +255,25 @@ const EnhancedStoreApp: React.FC = () => {
         if (error && currentView === 'store') {
             return <ErrorScreen onRetry={fetchProducts} />;
         }
-
         switch (currentView) {
+
             case 'store':
                 return (
-                    <ScrollView className="flex-1 p-6 mb-[95px]" showsVerticalScrollIndicator={false}>
+                    <SafeAreaView className="flex-1 p-6 mb-[95px]" showsVerticalScrollIndicator={false}>
                         <StoreHeader
                             cartCount={cartCount}
                             onSearchPress={() => setCurrentView('search')}
                             onCartPress={() => setCurrentView('cart')}
                         />
-                        {/*<StoreAdvert/>*/}
+                         <ScrollView className="" showsVerticalScrollIndicator={false}>
+
+                        <View className='flex bg-[#453ace] rounded-xl shadow-slate-600 h-48 mb-8 p-6 gap-4 justify-center'>
+                            <Text className='text-white font-bold text-2xl'>Graduation Sale!</Text>
+                            <Text className='color-white'>Get up to 20% off on selected items</Text>
+                            <TouchableOpacity className='bg-white w-32 px-4 py-2 rounded-lg'>
+                                <Text className='text-[#453ace] '>Shop Now</Text>
+                            </TouchableOpacity>
+                        </View>
 
                         {products.length === 0 ? (
                             <View className="items-center justify-center py-12">
@@ -223,7 +285,7 @@ const EnhancedStoreApp: React.FC = () => {
                                 </Text>
                             </View>
                         ) : (
-                            <View className="flex-row flex-wrap justify-between gap-4">
+                            <View className='flex-row flex-wrap gap-4'>
                                 {products.map((product) => (
                                     <ProductCard
                                         key={product.id}
@@ -238,6 +300,8 @@ const EnhancedStoreApp: React.FC = () => {
                             </View>
                         )}
                     </ScrollView>
+                    </SafeAreaView>
+
                 );
 
             case 'search':
@@ -292,6 +356,7 @@ const EnhancedStoreApp: React.FC = () => {
                         onAddToCart={addToCart}
                         cartCount={cartCount}
                     />
+
                 ) : null;
 
             case 'cart':
@@ -301,7 +366,8 @@ const EnhancedStoreApp: React.FC = () => {
                         onBack={() => setCurrentView('store')}
                         onUpdateQuantity={updateCartQuantity}
                         onRemoveItem={(id) => updateCartQuantity(id, 0)}
-                        onCheckout={() => setCurrentView('store')} // Simplified for demo
+                        onCheckout={onCheckout}
+                        loading={loading2}
                     />
                 );
 

@@ -1,9 +1,7 @@
-// contexts/UserContext.tsx
-import { createContext, useContext, useEffect, useState } from "react";
-import * as SecureStore from 'expo-secure-store';
-import axios from "axios";
 import { API_URL } from '@/utils/env';
-
+import axios from "axios";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import * as SecureStore from 'expo-secure-store';
 
 interface UserDetails {
     id: string;
@@ -11,38 +9,50 @@ interface UserDetails {
     lastName: string;
     email: string;
     zone: string;
-    // Add other fields if necessary
+    // profileImage?: string; // Added to match PersonalInfoScreen
 }
 
 interface UserContextType {
     userId: string | null;
     userDetails: UserDetails | null;
+    setUserDetails: (details: UserDetails | null) => void;
+    refetchUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider = ({ children }) => {
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     const [userId, setUserId] = useState<string | null>(null);
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-    console.log(API_URL)
 
-    useEffect(() => {
-        const fetchUserId = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/auth/tokenverify`, { withCredentials: true });
-                setUserId(response.data.user.id);
-                setUserDetails(response.data.user);
-                // console.log({"loggedin userDetails": response.data.user});
-                // console.log({"loggedin userId": response.data.user.id});
-            } catch (error) {
-                console.error("Error fetching user ID:", error);
+    const fetchUserId = useCallback(async () => {
+        try {
+            const token = await SecureStore.getItemAsync('userToken');
+            if (!token) {
+                setUserId(null);
+                setUserDetails(null);
+                return;
             }
-        };
-        fetchUserId();
+
+            const response = await axios.get(`${API_URL}/auth/tokenverify`, {
+                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true,
+            });
+            setUserId(response.data.user.id);
+            setUserDetails(response.data.user);
+        } catch (error) {
+            console.error("Error fetching user ID:", error);
+            setUserId(null);
+            setUserDetails(null);
+        }
     }, []);
 
+    useEffect(() => {
+        fetchUserId();
+    }, [fetchUserId]);
+
     return (
-        <UserContext.Provider value={{ userId, userDetails }}>
+        <UserContext.Provider value={{ userId, userDetails, setUserDetails, refetchUser: fetchUserId }}>
             {children}
         </UserContext.Provider>
     );

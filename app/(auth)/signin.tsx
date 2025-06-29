@@ -1,43 +1,45 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Animated, Dimensions, StatusBar } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Image, Animated, Dimensions, StatusBar, Modal } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import { useEffect, useRef } from "react";
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/utils/env';
+import Toast from 'react-native-toast-message';
+import { useUser } from "@/contexts/UserContext";
 
 const { width, height } = Dimensions.get('window');
-
 
 type FormData = {
     email: string;
     password: string;
 };
 
+type ForgotPasswordForm = {
+    forgotEmail: string;
+};
+
 const SigninScreen = () => {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
     const [emailFocused, setEmailFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
-    const [userEmail, setUserEmail] = useState('');
+    const [forgotModalVisible, setForgotModalVisible] = useState(false);
+    const [forgotLoading, setForgotLoading] = useState(false);
 
-    // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
     const logoScale = useRef(new Animated.Value(0.8)).current;
     const buttonScale = useRef(new Animated.Value(1)).current;
-    const errorShake = useRef(new Animated.Value(0)).current;
-
+    const { refetchUser } = useUser();
     const { control, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
+    const { control: forgotControl, handleSubmit: handleForgotSubmit, reset: resetForgotForm, formState: { errors: forgotErrors } } = useForm<ForgotPasswordForm>();
 
     useEffect(() => {
-        // Initial animations
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -66,17 +68,6 @@ const SigninScreen = () => {
         loadEmail();
     }, []);
 
-    // Shake animation for errors
-    const shakeError = () => {
-        Animated.sequence([
-            Animated.timing(errorShake, { toValue: 10, duration: 100, useNativeDriver: true }),
-            Animated.timing(errorShake, { toValue: -10, duration: 100, useNativeDriver: true }),
-            Animated.timing(errorShake, { toValue: 10, duration: 100, useNativeDriver: true }),
-            Animated.timing(errorShake, { toValue: 0, duration: 100, useNativeDriver: true }),
-        ]).start();
-    };
-
-    // Button press animation
     const onButtonPressIn = () => {
         Animated.spring(buttonScale, {
             toValue: 0.95,
@@ -93,10 +84,6 @@ const SigninScreen = () => {
 
     const onSubmit = async (data: FormData) => {
         setLoading(true);
-        setErrorMsg('');
-
-        // Save email to AsyncStorage for verification or future use
-        // await AsyncStorage.setItem('email', data.email);
 
         try {
             const response = await axios.post(`${API_URL}/auth/signin`, {
@@ -105,48 +92,93 @@ const SigninScreen = () => {
             });
 
             const token = response.data.token;
-            // Save email to AsyncStorage for verification or future use
-            // await AsyncStorage.setItem('email', data.email);
 
             if (token) {
                 await SecureStore.setItemAsync('userToken', token);
-                // await SecureStore.setItemAsync('savedEmail', data.email);
+                await SecureStore.setItemAsync('savedEmail', data.email);
+                await refetchUser();
 
-                router.replace("/(tabs)");
+                Toast.show({
+                    type: 'success',
+                    text1: 'Sign-in Successful!',
+                    visibilityTime: 2000,
+                });
+
+                // Navigate with a timestamp to trigger reload
+                router.push({
+                    pathname: "/(tabs)",
+                    params: { reload: Date.now().toString() }
+                });
             } else {
-                setErrorMsg('Token not received from server.');
-                shakeError();
+                Toast.show({
+                    type: 'error',
+                    text1: 'Sign-in Failed',
+                    text2: 'Authentication token not received.',
+                    visibilityTime: 4000,
+                });
             }
         } catch (error: unknown) {
             console.error("Sign-in error:", error);
 
             if (error instanceof AxiosError) {
-                const errorMessage = error.response?.data?.error ?? "Sign-in failed";
-
-                if (errorMessage.includes("User not verified")) {
-                    try{
-                        await axios.post(`${API_URL}/auth/resendcode`, {email: data.email});
-                        // setSuccess(response.data.message || "Resend Succeessful")
-                        setErrorMsg("User not verified. Redirecting to verification...");
-                        setTimeout(() => router.push("/(auth)/SignupVerification"), 2000);
-                    }catch(error){
-                        if (axios.isAxiosError(error)) {
-                            setErrorMsg(error.response?.data?.error || "Resend failed");
-                        } else {
-                            setErrorMsg("An unknown error occurred.");
-                        }
-                    }
-
-
-                } else {
-                    setErrorMsg(errorMessage);
-                }
+                const errorMessage = error.response?.data?.error ?? "Sign-in failed. Please try again.";
+                Toast.show({
+                    type: 'error',
+                    text1: 'Sign-in Failed',
+                    text2: errorMessage,
+                    visibilityTime: 4000,
+                });
             } else {
-                setErrorMsg("An unknown error occurred.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'An Unknown Error Occurred',
+                    text2: 'Please try again later.',
+                    visibilityTime: 4000,
+                });
             }
-            shakeError();
         } finally {
             setLoading(false);
+        }
+    };
+
+    const onForgotPasswordSubmit = async (data: ForgotPasswordForm) => {
+        setForgotLoading(true);
+
+        try {
+            const response = await axios.post(`${API_URL}/auth/forgot-password`, {
+                email: data.forgotEmail,
+            });
+
+            Toast.show({
+                type: 'success',
+                text1: 'Password Reset Request Sent',
+                text2: response.data.message || 'If an account exists, a reset link has been sent.',
+                visibilityTime: 4000,
+            });
+
+            setForgotModalVisible(false);
+            resetForgotForm();
+        } catch (error: unknown) {
+            console.error("Forgot Password Error:", error);
+
+            if (error instanceof AxiosError) {
+                const errorMessage = error.response?.data?.error ?? "Failed to send reset request. Please try again.";
+                Toast.show({
+                    type: 'error',
+                    text1: 'Reset Request Failed',
+                    text2: errorMessage,
+                    visibilityTime: 4000,
+                });
+            } else {
+                Toast.show({
+                    type: 'error',
+                    text1: 'An Unknown Error Occurred',
+                    text2: 'Please try again later.',
+                    visibilityTime: 4000,
+                });
+            }
+        } finally {
+            setForgotLoading(false);
         }
     };
 
@@ -167,11 +199,9 @@ const SigninScreen = () => {
                     }}
                     className="px-6 py-10 justify-center"
                 >
-                    {/* Background Decorative Elements */}
                     <View className="absolute top-20 right-0 w-32 h-32 bg-white/5 rounded-full" />
                     <View className="absolute bottom-40 left-0 w-24 h-24 bg-white/5 rounded-full" />
 
-                    {/* Logo with Animation */}
                     <Animated.View
                         style={{
                             transform: [{ scale: logoScale }],
@@ -188,15 +218,12 @@ const SigninScreen = () => {
                         </View>
                     </Animated.View>
 
-                    {/* Welcome Text */}
                     <View className="items-center mb-10">
                         <Text className="text-4xl font-bold text-white mb-2">Welcome Back!</Text>
                         <Text className="text-lg text-white/70">Sign in to continue your journey</Text>
                     </View>
 
-                    {/* Form Container */}
                     <View className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl">
-                        {/* Email Field */}
                         <View className="mb-6">
                             <View className={`relative bg-white/90 rounded-2xl border-2 ${
                                 emailFocused ? 'border-yellow-400 shadow-lg' : 'border-transparent'
@@ -217,7 +244,7 @@ const SigninScreen = () => {
                                             message: 'Please enter a valid email'
                                         }
                                     }}
-                                    render={({ field: { onChange, value } }) => (
+                                    render={({ field: { onChange, value, onBlur } }) => (
                                         <TextInput
                                             className="pl-12 pr-4 py-4 text-base text-gray-800 font-medium"
                                             placeholder="Email Address"
@@ -227,22 +254,21 @@ const SigninScreen = () => {
                                             autoCapitalize="none"
                                             keyboardType="email-address"
                                             // onFocus={() => setEmailFocused(true)}
-                                            // onBlur={() => setEmailFocused(false)}
+                                            onBlur={() => {
+                                                onBlur();
+                                                setEmailFocused(false);
+                                            }}
                                         />
                                     )}
                                 />
                             </View>
                             {errors.email && (
-                                <Animated.Text
-                                    style={{ transform: [{ translateX: errorShake }] }}
-                                    className="text-yellow-300 mt-2 ml-2 font-medium"
-                                >
+                                <Text className="text-red-400 mt-2 ml-2 font-medium">
                                     {errors.email.message}
-                                </Animated.Text>
+                                </Text>
                             )}
                         </View>
 
-                        {/* Password Field */}
                         <View className="mb-6">
                             <View className={`relative bg-white/90 rounded-2xl border-2 ${
                                 passwordFocused ? 'border-yellow-400 shadow-lg' : 'border-transparent'
@@ -263,7 +289,7 @@ const SigninScreen = () => {
                                             message: 'Password must be at least 4 characters'
                                         }
                                     }}
-                                    render={({ field: { onChange, value } }) => (
+                                    render={({ field: { onChange, value, onBlur } }) => (
                                         <TextInput
                                             className="pl-12 pr-12 py-4 text-base text-gray-800 font-medium"
                                             placeholder="Password"
@@ -272,7 +298,10 @@ const SigninScreen = () => {
                                             value={value || ''}
                                             secureTextEntry={!showPassword}
                                             // onFocus={() => setPasswordFocused(true)}
-                                            // onBlur={() => setPasswordFocused(false)}
+                                            onBlur={() => {
+                                                onBlur();
+                                                setPasswordFocused(false);
+                                            }}
                                         />
                                     )}
                                 />
@@ -289,26 +318,12 @@ const SigninScreen = () => {
                                 </TouchableOpacity>
                             </View>
                             {errors.password && (
-                                <Animated.Text
-                                    style={{ transform: [{ translateX: errorShake }] }}
-                                    className="text-yellow-300 mt-2 ml-2 font-medium"
-                                >
+                                <Text className="text-red-400 mt-2 ml-2 font-medium">
                                     {errors.password.message}
-                                </Animated.Text>
+                                </Text>
                             )}
                         </View>
 
-                        {/* Error Message */}
-                        {errorMsg ? (
-                            <Animated.View
-                                style={{ transform: [{ translateX: errorShake }] }}
-                                className="bg-red-500/20 border border-red-400/30 rounded-xl p-3 mb-6"
-                            >
-                                <Text className="text-red-300 text-center font-medium">{errorMsg}</Text>
-                            </Animated.View>
-                        ) : null}
-
-                        {/* Submit Button */}
                         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
                             <TouchableOpacity
                                 className="rounded-2xl overflow-hidden shadow-lg"
@@ -340,7 +355,6 @@ const SigninScreen = () => {
                         </Animated.View>
                     </View>
 
-                    {/* Links */}
                     <View className="items-center mt-8 gap-4 space-y-4">
                         <TouchableOpacity
                             onPress={() => router.push('/signup')}
@@ -353,7 +367,7 @@ const SigninScreen = () => {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                            onPress={() => router.push('/resetpassword')}
+                            onPress={() => setForgotModalVisible(true)}
                             activeOpacity={0.7}
                         >
                             <Text className="text-white/70 font-medium">
@@ -362,7 +376,79 @@ const SigninScreen = () => {
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
+
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={forgotModalVisible}
+                    onRequestClose={() => setForgotModalVisible(false)}
+                >
+                    <View className="flex-1 justify-center items-center bg-black/50">
+                        <View className="bg-white rounded-2xl p-6 w-[90%]">
+                            <Text className="text-xl font-bold mb-4">Reset Password</Text>
+                            <View className="mb-6">
+                                <View className="relative bg-white rounded-2xl border-2 border-gray-300">
+                                    <Ionicons
+                                        name="mail-outline"
+                                        size={20}
+                                        color="#6b7280"
+                                        style={{ position: 'absolute', top: 16, left: 16, zIndex: 1 }}
+                                    />
+                                    <Controller
+                                        control={forgotControl}
+                                        name="forgotEmail"
+                                        rules={{
+                                            required: 'Email is required',
+                                            pattern: {
+                                                value: /^\S+@\S+$/i,
+                                                message: 'Please enter a valid email'
+                                            }
+                                        }}
+                                        render={({ field: { onChange, value, onBlur } }) => (
+                                            <TextInput
+                                                className="pl-12 pr-4 py-4 text-base text-gray-800 font-medium"
+                                                placeholder="Enter your email"
+                                                placeholderTextColor="#9ca3af"
+                                                onChangeText={onChange}
+                                                value={value || ''}
+                                                autoCapitalize="none"
+                                                keyboardType="email-address"
+                                                onBlur={onBlur}
+                                            />
+                                        )}
+                                    />
+                                </View>
+                                {forgotErrors.forgotEmail && (
+                                    <Text className="text-red-400 mt-2 ml-2 font-medium">
+                                        {forgotErrors.forgotEmail.message}
+                                    </Text>
+                                )}
+                            </View>
+                            <View className="flex-row gap-5 justify-end space-x-3">
+                                <TouchableOpacity
+                                    className="bg-gray-200 rounded-lg px-4 py-2"
+                                    onPress={() => {
+                                        setForgotModalVisible(false);
+                                        resetForgotForm();
+                                    }}
+                                >
+                                    <Text className="text-gray-800 font-medium">Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    className="bg-[#4f46e5] rounded-lg px-4 py-2"
+                                    onPress={handleForgotSubmit(onForgotPasswordSubmit)}
+                                    disabled={forgotLoading}
+                                >
+                                    <Text className="text-white font-medium">
+                                        {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </LinearGradient>
+            <Toast />
         </>
     );
 };

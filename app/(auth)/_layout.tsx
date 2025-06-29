@@ -3,6 +3,7 @@ import { Stack, Redirect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { ActivityIndicator, View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Toast from 'react-native-toast-message'; // Import Toast
 
 export default function AuthLayout() {
     const { user, loading } = useAuth();
@@ -21,9 +22,12 @@ export default function AuthLayout() {
     }
 
     return (
-        <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="signin" options={{ headerShown: false }} />
-            <Stack.Screen name="signup" options={{ headerShown: false }} />
-        </Stack>
+        <>
+            <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="signin" options={{ headerShown: false }} />
+                <Stack.Screen name="signup" options={{ headerShown: false }} />
+            </Stack>
+            <Toast />
+        </>
     );
 }

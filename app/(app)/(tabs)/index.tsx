@@ -68,7 +68,7 @@ export default function Index() {
                                     Live TV
                                 </Text>
                                 <Text className="text-gray-500 text-sm" style={{ fontFamily: 'System' }}>
-                                    Watch services live
+                                    Program Lineups
                                 </Text>
                             </TouchableOpacity>
                         
@@ -110,7 +110,7 @@ export default function Index() {
                                     Store
                                 </Text>
                                 <Text className="text-gray-500 text-sm" style={{ fontFamily: 'System' }}>
-                                    Browse resources
+                                    Amazing Collections
                                 </Text>
                             </TouchableOpacity>
                         </View>

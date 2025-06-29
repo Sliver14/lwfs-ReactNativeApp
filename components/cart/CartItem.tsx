@@ -1,15 +1,13 @@
 // components/cart/CartItem.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
 import { Feather, MaterialIcons } from '@expo/vector-icons';
-import { Card } from '../shared/Card';
+import React from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { CartItem as CartItemType } from '../../types';
-import {Image} from "react-native";
+import { Card } from '../shared/Card';
+import { useUserCart } from '@/contexts/UserCartContext'; // Import useUserCart
 
 interface CartItemProps {
     item: CartItemType;
-    onUpdateQuantity: (id: number, quantity: number) => void;
-    onRemove: (id: number) => void;
 }
 
 const getIconComponent = (iconName: string) => {
@@ -22,45 +20,59 @@ const getIconComponent = (iconName: string) => {
     return iconMap[iconName] || Feather;
 };
 
-export const CartItemComponent: React.FC<CartItemProps> = ({
-                                                               item,
-                                                               onUpdateQuantity,
-                                                               onRemove
-                                                           }) => {
+export const CartItemComponent: React.FC<CartItemProps> = ({ item }) => {
+    const { increaseItemQuantity, decreaseItemQuantity, removeCartItemById } = useUserCart();
     const product = item.product;
     const IconComponent = getIconComponent(item.iconName);
-    console.log(item)
+
+    const handleIncreaseQuantity = () => {
+        if (product?.id) {
+            increaseItemQuantity(product.id);
+        }
+    };
+
+    const handleDecreaseQuantity = () => {
+        if (product?.id) {
+            decreaseItemQuantity(product.id);
+            // Only decrease if quantity is greater than 1, otherwise remove the item
+            // if (item.quantity > 1) {
+            //     decreaseItemQuantity(product.id);
+            // } else {
+            //     // If quantity is 1 and decreased, remove the item entirely
+            //     removeCartItemById(item.id);
+            // }
+        }
+    };
 
     return (
-        <Card className="flex-row items-center p-4 gap-4">
+        <Card className="flex-row items-center p-4 gap-4" style={{ marginBottom: 8 }}>
             <View className="w-16 h-16 bg-gray-100 rounded-lg items-center justify-center">
                 <Image
                     source={{ uri: product?.imageUrl }}
                     style={{ width: '100%', height: '100%' }}
                     resizeMode="cover"
                 />
-
             </View>
             <View className="flex-1">
                 <Text className="font-semibold text-base text-gray-800 mb-1">{product?.name}</Text>
-                {/*<Text className="text-gray-500 text-xs mb-1">{item.description}</Text>*/}
-                <Text className="font-bold text-blue-500 text-sm">{product.price}</Text>
+                <Text className="font-bold text-[#453ace] text-sm">{product?.price} Espees</Text>
             </View>
             <View className="flex-row items-center gap-2">
                 <TouchableOpacity
                     className="p-1 bg-gray-100 rounded-full w-8 h-8 items-center justify-center"
-                    onPress={() => onUpdateQuantity(item.id, product.quantity - 1)}
+                    onPress={handleDecreaseQuantity}
                 >
                     <Feather name="minus" size={16} color="#6B7280" />
                 </TouchableOpacity>
                 <Text className="font-medium text-base min-w-8 text-center">{item?.quantity}</Text>
                 <TouchableOpacity
                     className="p-1 bg-gray-100 rounded-full w-8 h-8 items-center justify-center"
-                    onPress={() => onUpdateQuantity(product.id, product.quantity + 1)}
+                    onPress={handleIncreaseQuantity}
                 >
                     <Feather name="plus" size={16} color="#6B7280" />
                 </TouchableOpacity>
             </View>
+            {/* The trash icon is removed from here as it's now part of the swipe action */}
         </Card>
     );
 };

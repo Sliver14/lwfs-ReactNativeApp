@@ -174,7 +174,7 @@ export default function EventCarousel() {
                         onPress={() => scrollToCard(index)}
                         className="w-2 h-2 rounded-full mx-1"
                         style={{
-                            backgroundColor: index === activeIndex ? '#9333ea' : '#d1d5db',
+                            backgroundColor: index === activeIndex ? '#453ace' : '#d1d5db',
                             width: index === activeIndex ? 8 : 6,
                             height: index === activeIndex ? 8 : 6,
                         }}

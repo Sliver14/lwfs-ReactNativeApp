@@ -17,13 +17,15 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
-import { useUser } from '../contexts/UserContext';
+import { useUser } from '@/contexts/UserContext';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 export default function PersonalInfoScreen() {
     const { userDetails, setUserDetails } = useUser();
+    const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [form, setForm] = useState({
         firstName: userDetails?.firstName || '',
@@ -105,7 +107,6 @@ export default function PersonalInfoScreen() {
     };
 
     const updateProfile = async () => {
-        // Animate button press
         Animated.sequence([
             Animated.timing(fadeAnim, { duration: 100, toValue: 0.8, useNativeDriver: true }),
             Animated.timing(fadeAnim, { duration: 100, toValue: 1, useNativeDriver: true })
@@ -147,15 +148,19 @@ export default function PersonalInfoScreen() {
                 showsVerticalScrollIndicator={false}
                 bounces={false}
             >
-                {/* Header Section with Gradient */}
                 <LinearGradient
                     colors={['#6366f1', '#8b5cf6', '#a855f7']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     className="pb-8 pt-12"
                 >
+                    <View className="flex-row items-center px-4 mb-4">
+                        <TouchableOpacity onPress={() => router.push('/profile')}>
+                            <Ionicons name="arrow-back" size={24} color="white" />
+                        </TouchableOpacity>
+                        {/*<Text className="text-white text-xl font-bold ml-4">Personal Information</Text>*/}
+                    </View>
                     <View className="items-center px-6">
-                        {/* Profile Image Container */}
                         <View className="relative mb-4">
                             <View className="w-32 h-32 rounded-full bg-white/20 items-center justify-center shadow-lg">
                                 {imageLoading ? (
@@ -171,8 +176,6 @@ export default function PersonalInfoScreen() {
                                     />
                                 )}
                             </View>
-
-                            {/* Camera Button */}
                             <TouchableOpacity
                                 className="absolute -bottom-2 -right-2 bg-white rounded-full p-3 shadow-lg"
                                 onPress={pickImage}
@@ -192,7 +195,6 @@ export default function PersonalInfoScreen() {
                                 )}
                             </TouchableOpacity>
                         </View>
-
                         <Text className="text-white text-2xl font-bold mb-1">
                             {form.firstName || 'User'} {form.lastName}
                         </Text>
@@ -202,7 +204,6 @@ export default function PersonalInfoScreen() {
                     </View>
                 </LinearGradient>
 
-                {/* Form Section */}
                 <View className="flex-1 px-6 -mt-4">
                     <View className="bg-white rounded-2xl shadow-sm p-6" style={{
                         shadowColor: '#000',
@@ -211,7 +212,6 @@ export default function PersonalInfoScreen() {
                         shadowRadius: 3,
                         elevation: 3
                     }}>
-                        {/* Section Header */}
                         <View className="flex-row items-center justify-between mb-6">
                             <Text className="text-xl font-semibold text-gray-800">
                                 Personal Information
@@ -223,7 +223,6 @@ export default function PersonalInfoScreen() {
                             </View>
                         </View>
 
-                        {/* Form Fields */}
                         {Object.keys(form).map((key, index) => (
                             <View className="mb-6" key={key}>
                                 <Text className="text-gray-600 text-sm font-medium mb-2 ml-1">
@@ -252,7 +251,6 @@ export default function PersonalInfoScreen() {
                             </View>
                         ))}
 
-                        {/* Action Buttons */}
                         <View className="flex-row space-x-3 mt-4">
                             <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
                                 <TouchableOpacity
@@ -309,7 +307,6 @@ export default function PersonalInfoScreen() {
                     </View>
                 </View>
 
-                {/* Bottom Spacing */}
                 <View className="h-8" />
             </ScrollView>
         </>

@@ -24,11 +24,11 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     <View style={styles.container}>
         <View style={styles.textContainer}>
             <Text style={styles.greeting}>
-                Welcome, {name}
+                Welcome, {name.charAt(0).toUpperCase() + name.slice(1)}
             </Text>
-            <Text style={styles.subtitle}>
-                Continue your spiritual journey
-            </Text>
+            {/*<Text style={styles.subtitle}>*/}
+            {/*    Year of Completeness!*/}
+            {/*</Text>*/}
         </View>
 
         <View style={styles.actionsContainer}>

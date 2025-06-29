@@ -12,23 +12,26 @@ import zones from "../../utils/zones";
 import axios, { AxiosError } from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/utils/env';
+import Toast from 'react-native-toast-message';
 
 const { width, height } = Dimensions.get('window');
 
 interface SignupFormValues {
     firstName: string;
     lastName: string;
-    countryCode: string;
     phoneNumber: string;
     zone: string;
     country: string;
+    city: string;
     church: string;
     email: string;
+    kcUsername: string;
     password: string;
     confirmPassword: string;
 }
 
-const validationSchema = Yup.object({
+// Validation schemas for each step
+const step1ValidationSchema = Yup.object({
     firstName: Yup.string()
         .trim()
         .matches(/^[A-Za-z\s]+$/, "First Name must contain only letters")
@@ -37,15 +40,19 @@ const validationSchema = Yup.object({
         .trim()
         .matches(/^[A-Za-z\s]+$/, "Last Name must contain only letters")
         .required("Last Name is required"),
-    countryCode: Yup.string().required("Country Code is required"),
     phoneNumber: Yup.string()
         .max(15, "Phone number must not exceed 15 digits")
         .matches(/^\d+$/, "Phone number must contain only numbers")
         .required("Phone number is required"),
-    zone: Yup.string().required("Zone is required"),
     country: Yup.string().required("Country is required"),
+    city: Yup.string().required("City is required"),
+});
+
+const step2ValidationSchema = Yup.object({
+    zone: Yup.string().required("Zone is required"),
     church: Yup.string().required("Church is required"),
     email: Yup.string().email("Invalid email address").required("Email is required"),
+    kcUsername: Yup.string().min(3, "Kingschat ID must be at least 3 characters").required("Kingschat ID is required"),
     password: Yup.string().min(4, "Password must be at least 4 characters").required("Password is required"),
     confirmPassword: Yup.string()
         .oneOf([Yup.ref("password")], "Passwords must match")
@@ -55,40 +62,40 @@ const validationSchema = Yup.object({
 const SignupScreen = () => {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [focusedFields, setFocusedFields] = useState<{ [key: string]: boolean }>({});
+    const [currentStep, setCurrentStep] = useState(1);
 
-    // Animation values
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
     const logoScale = useRef(new Animated.Value(0.8)).current;
     const buttonScale = useRef(new Animated.Value(1)).current;
-    const errorShake = useRef(new Animated.Value(0)).current;
 
     const {
         control,
         handleSubmit,
         watch,
         formState: { errors },
+        trigger,
+        resetField,
     } = useForm<SignupFormValues>({
-        resolver: yupResolver(validationSchema),
+        resolver: yupResolver(currentStep === 1 ? step1ValidationSchema : step2ValidationSchema),
         defaultValues: {
             firstName: "",
             lastName: "",
-            countryCode: "+234",
             phoneNumber: "",
             zone: "",
             country: "Nigeria",
+            city: "",
             church: "",
             email: "",
+            kcUsername: "",
             password: "",
             confirmPassword: "",
         },
     });
 
     useEffect(() => {
-        // Initial animations
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -109,24 +116,25 @@ const SignupScreen = () => {
         ]).start();
 
         const subscription = watch((value) => {
-            if (value.email) {
-                // Save to local storage if needed
+            if (value.email && currentStep === 2) {
+                AsyncStorage.setItem('email', value.email).catch(console.error);
             }
         });
         return () => subscription.unsubscribe();
-    }, [watch]);
+    }, [watch, currentStep]);
 
-    // Shake animation for errors
-    const shakeError = () => {
-        Animated.sequence([
-            Animated.timing(errorShake, { toValue: 10, duration: 100, useNativeDriver: true }),
-            Animated.timing(errorShake, { toValue: -10, duration: 100, useNativeDriver: true }),
-            Animated.timing(errorShake, { toValue: 10, duration: 100, useNativeDriver: true }),
-            Animated.timing(errorShake, { toValue: 0, duration: 100, useNativeDriver: true }),
-        ]).start();
-    };
+    useEffect(() => {
+        if (currentStep === 2) {
+            // Clear Step 2 fields when switching to Step 2
+            resetField("zone");
+            resetField("church");
+            resetField("email");
+            resetField("kcUsername");
+            resetField("password");
+            resetField("confirmPassword");
+        }
+    }, [currentStep, resetField]);
 
-    // Button press animation
     const onButtonPressIn = () => {
         Animated.spring(buttonScale, {
             toValue: 0.95,
@@ -149,66 +157,50 @@ const SignupScreen = () => {
         setFocusedFields(prev => ({ ...prev, [fieldName]: false }));
     };
 
-    // const onSubmit = async (data: SignupFormValues) => {
-    //     setLoading(true);
-    //     setError(null);
-    //     try {
-    //         // Your API call here
-    //         console.log("Form data", data);
-    //         // router.push("/signup/verify");
-    //     } catch (e) {
-    //         setError("Signup failed. Please try again.");
-    //         shakeError();
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
     const onSubmit = async (data: SignupFormValues) => {
-        setLoading(true);
-        setError(null);
-        // setSuccess(null);
+        if (currentStep === 1) {
+            const isValid = await trigger(['firstName', 'lastName', 'phoneNumber', 'country', 'city']);
+            if (isValid) {
+                setCurrentStep(2);
+            }
+            return;
+        }
 
-        // Save email to AsyncStorage for verification or future use
-        await AsyncStorage.setItem('email', data.email);
+        setLoading(true);
 
         try {
             await axios.post(`${API_URL}/auth/signup`, data);
-            router.push("/(auth)/SignupVerification");
 
-
-            // setSuccess(response.data.message);
-
-        } catch(error){
-            // console.error("Error Signing up", error);
+            Toast.show({
+                type: 'success',
+                text1: 'Account Created!',
+                text2: 'Verification link has been sent to your email.',
+                visibilityTime: 4000,
+            });
+        } catch (error) {
+            console.error("Error Signing up:", error);
 
             if (error instanceof AxiosError) {
-                const errorMessage = error.response?.data?.error ?? "Sign-up failed";
-
-                if (errorMessage.includes("User not verified")) {
-                    try{
-                        await axios.post(`${API_URL}/auth/resendcode`, {email: data.email});
-                        // setSuccess(response.data.message || "Resend Succeessful")
-                        setError("User not verified. Redirecting to verification...");
-                        setTimeout(() => router.push("/(auth)/SignupVerification"), 2000);
-                    }catch(error){
-                        if (axios.isAxiosError(error)) {
-                            setError(error.response?.data?.error || "Resend failed");
-                        } else {
-                            setError("An unknown error occurred.");
-                        }
-                    }
-                    // setError("User not verified. Redirecting to verification...");
-                    // setTimeout(() => router.push("/(auth)/SignupVerification"), 2000);
-                } else {
-                    setError(errorMessage);
-                }
+                const errorMessage = error.response?.data?.error ?? "Sign-up failed. Please try again.";
+                Toast.show({
+                    type: 'error',
+                    text1: 'Sign-up Failed',
+                    text2: errorMessage,
+                    visibilityTime: 4000,
+                });
             } else {
-                setError("An unknown error occurred.");
+                Toast.show({
+                    type: 'error',
+                    text1: 'An Unknown Error Occurred',
+                    text2: 'Please try again later.',
+                    visibilityTime: 4000,
+                });
             }
         } finally {
             setLoading(false);
         }
-    }
+    };
+
     const renderInputField = (
         name: keyof SignupFormValues,
         placeholder: string,
@@ -237,13 +229,13 @@ const SignupScreen = () => {
                             onChangeText={onChange}
                             value={value}
                             keyboardType={keyboardType}
-                            secureTextEntry={secureTextEntry}
-                            autoCapitalize={name === 'email' ? 'none' : 'words'}
+                            secureTextEntry={secureTextEntry ? !showPassword : false}
+                            autoCapitalize={name === 'email' || name === 'kcUsername' ? 'none' : 'words'}
                             // onFocus={() => handleFieldFocus(name)}
-                            // onBlur={() => {
-                            //     onBlur();
-                            //     handleFieldBlur(name);
-                            // }}
+                            onBlur={() => {
+                                onBlur();
+                                handleFieldBlur(name);
+                            }}
                         />
                     )}
                 />
@@ -262,12 +254,9 @@ const SignupScreen = () => {
                 ) : null}
             </View>
             {errors[name] && (
-                <Animated.Text
-                    style={{ transform: [{ translateX: errorShake }] }}
-                    className="text-yellow-300 mt-2 ml-2 font-medium text-sm"
-                >
+                <Text className="text-red-400 mt-2 ml-2 font-medium text-sm">
                     {errors[name]?.message}
-                </Animated.Text>
+                </Text>
             )}
         </View>
     );
@@ -291,11 +280,18 @@ const SignupScreen = () => {
                 <Controller
                     control={control}
                     name={name}
-                    render={({ field: { onChange, value } }) => (
+                    render={({ field: { onChange, value, onBlur } }) => (
                         <View className="pl-12 pr-4">
                             <Picker
                                 selectedValue={value}
-                                onValueChange={(itemValue) => onChange(itemValue)}
+                                onValueChange={(itemValue) => {
+                                    onChange(itemValue);
+                                    // handleFieldFocus(name); // Simulate focus on value change
+                                }}
+                                onBlur={() => {
+                                    onBlur();
+                                    handleFieldBlur(name);
+                                }}
                                 style={{
                                     color: '#374151',
                                     fontWeight: '500',
@@ -312,12 +308,9 @@ const SignupScreen = () => {
                 />
             </View>
             {errors[name] && (
-                <Animated.Text
-                    style={{ transform: [{ translateX: errorShake }] }}
-                    className="text-yellow-300 mt-2 ml-2 font-medium text-sm"
-                >
+                <Text className="text-red-400 mt-2 ml-2 font-medium text-sm">
                     {errors[name]?.message}
-                </Animated.Text>
+                </Text>
             )}
         </View>
     );
@@ -343,11 +336,9 @@ const SignupScreen = () => {
                         }}
                         className="px-6 py-8"
                     >
-                        {/* Background Decorative Elements */}
                         <View className="absolute top-10 right-0 w-32 h-32 bg-white/5 rounded-full" />
                         <View className="absolute bottom-40 left-0 w-24 h-24 bg-white/5 rounded-full" />
 
-                        {/* Logo with Animation */}
                         <Animated.View
                             style={{
                                 transform: [{ scale: logoScale }],
@@ -364,79 +355,94 @@ const SignupScreen = () => {
                             </View>
                         </Animated.View>
 
-                        {/* Welcome Text */}
                         <View className="items-center mb-8">
                             <Text className="text-xl font-bold text-white mb-2 text-center">Welcome to Loveworld Foundation School!</Text>
-                            <Text className="text-base text-white/70 text-center">Create your account to get started</Text>
+                            <Text className="text-base text-white/70 text-center">Create your account to get started - Step {currentStep} of 2</Text>
                         </View>
 
-                        {/* Form Container */}
                         <View className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl">
-                            {/* Personal Information */}
-                            <Text className="text-white font-bold text-lg mb-4 text-center">Personal Information</Text>
+                            <Text className="text-white font-bold text-lg mb-4 text-center">
+                                {currentStep === 1 ? "Personal Information" : "Account Details"}
+                            </Text>
 
-                            {renderInputField('firstName', 'First Name', 'person-outline')}
-                            {renderInputField('lastName', 'Last Name', 'person-outline')}
-
-                            {/* Country Picker */}
-                            {renderPickerField('country', 'Select your country', country, 'location-outline')}
-
-                            {renderInputField('phoneNumber', 'Phone Number', 'call-outline', 'phone-pad')}
-
-                            {/* Zone Picker */}
-                            {renderPickerField('zone', 'Select your zone', zones, 'business-outline')}
-
-                            {renderInputField('church', 'Church', 'home-outline')}
-
-                            {/* Account Information */}
-                            {/*<Text className="text-white font-bold text-lg mb-4 mt-6 text-center">Account Information</Text>*/}
-
-                            {renderInputField('email', 'Email Address', 'mail-outline', 'email-address')}
-                            {renderInputField('password', 'Password', 'lock-closed-outline', 'default', !showPassword)}
-                            {renderInputField('confirmPassword', 'Confirm Password', 'lock-closed-outline', 'default', !showPassword)}
-
-                            {/* Error Message */}
-                            {error && (
-                                <Animated.View
-                                    style={{ transform: [{ translateX: errorShake }] }}
-                                    className="bg-red-500/20 border border-red-400/30 rounded-xl p-3 mb-6"
-                                >
-                                    <Text className="text-red-300 text-center font-medium">{error}</Text>
-                                </Animated.View>
+                            {currentStep === 1 ? (
+                                <>
+                                    {renderInputField('firstName', 'First Name', 'person-outline')}
+                                    {renderInputField('lastName', 'Last Name', 'person-outline')}
+                                    {renderInputField('phoneNumber', 'Phone Number', 'call-outline', 'phone-pad')}
+                                    {renderPickerField('country', 'Select your country', country, 'location-outline')}
+                                    {renderInputField('city', 'City', 'location-outline')}
+                                </>
+                            ) : (
+                                <>
+                                    {renderPickerField('zone', 'Select your zone', zones, 'business-outline')}
+                                    {renderInputField('church', 'Church', 'home-outline')}
+                                    {renderInputField('email', 'Email Address', 'mail-outline', 'email-address')}
+                                    {renderInputField('kcUsername', 'Kingschat ID', 'person-circle-outline', 'default')}
+                                    {renderInputField('password', 'Password', 'lock-closed-outline', 'default', true)}
+                                    {renderInputField('confirmPassword', 'Confirm Password', 'lock-closed-outline', 'default', true)}
+                                </>
                             )}
 
-                            {/* Submit Button */}
-                            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-                                <TouchableOpacity
-                                    className="rounded-2xl py-4 items-center shadow-lg mt-4"
-                                    disabled={loading}
-                                    onPress={handleSubmit(onSubmit)}
-                                    onPressIn={onButtonPressIn}
-                                    onPressOut={onButtonPressOut}
-                                    activeOpacity={0.9}
-                                >
-                                    <LinearGradient
-                                        colors={loading ? ['#9ca3af', '#6b7280'] : ['#f59e0b', '#f97316']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 1, y: 0 }}
-                                        style={{
-                                            flex: 1,
-                                            width: '100%',
-                                            borderRadius: 16,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            paddingVertical: 16
-                                        }}
+                            <View className="flex-row space-x-3 mt-4">
+                                {currentStep === 2 && (
+                                    <Animated.View style={{ transform: [{ scale: buttonScale }], flex: 1 }}>
+                                        <TouchableOpacity
+                                            className="rounded-2xl py-4 items-center shadow-lg"
+                                            onPress={() => setCurrentStep(1)}
+                                            onPressIn={onButtonPressIn}
+                                            onPressOut={onButtonPressOut}
+                                            activeOpacity={0.9}
+                                        >
+                                            <LinearGradient
+                                                colors={['#6b7280', '#4b5563']}
+                                                start={{ x: 0, y: 0 }}
+                                                end={{ x: 1, y: 0 }}
+                                                style={{
+                                                    flex: 1,
+                                                    width: '100%',
+                                                    borderRadius: 16,
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    paddingVertical: 16
+                                                }}
+                                            >
+                                                <Text className="text-white font-bold text-lg">Back</Text>
+                                            </LinearGradient>
+                                        </TouchableOpacity>
+                                    </Animated.View>
+                                )}
+                                <Animated.View style={{ transform: [{ scale: buttonScale }], flex: 1 }}>
+                                    <TouchableOpacity
+                                        className="rounded-2xl py-4 items-center shadow-lg"
+                                        disabled={loading}
+                                        onPress={handleSubmit(onSubmit)}
+                                        onPressIn={onButtonPressIn}
+                                        onPressOut={onButtonPressOut}
+                                        activeOpacity={0.9}
                                     >
-                                        <Text className="text-white font-bold text-lg">
-                                            {loading ? 'Creating Account...' : 'Create Account'}
-                                        </Text>
-                                    </LinearGradient>
-                                </TouchableOpacity>
-                            </Animated.View>
+                                        <LinearGradient
+                                            colors={loading ? ['#9ca3af', '#6b7280'] : ['#f59e0b', '#f97316']}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 0 }}
+                                            style={{
+                                                flex: 1,
+                                                width: '100%',
+                                                borderRadius: 16,
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                paddingVertical: 16
+                                            }}
+                                        >
+                                            <Text className="text-white font-bold text-lg">
+                                                {loading ? 'Creating Account...' : currentStep === 1 ? 'Next' : 'Create Account'}
+                                            </Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                </Animated.View>
+                            </View>
                         </View>
 
-                        {/* Sign In Link */}
                         <View className="items-center mt-6">
                             <TouchableOpacity
                                 onPress={() => router.push('/signin')}
@@ -451,6 +457,7 @@ const SignupScreen = () => {
                     </Animated.View>
                 </ScrollView>
             </LinearGradient>
+            <Toast />
         </>
     );
 };
