@@ -24,7 +24,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     <View style={styles.container}>
         <View style={styles.textContainer}>
             <Text style={styles.greeting}>
-                Welcome, {name.charAt(0).toUpperCase() + name.slice(1)}
+                Welcome, {name ? name.charAt(0).toUpperCase() + name.slice(1) : ""}
             </Text>
             {/*<Text style={styles.subtitle}>*/}
             {/*    Year of Completeness!*/}

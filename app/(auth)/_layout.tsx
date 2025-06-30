@@ -1,7 +1,7 @@
 // app/(auth)/_layout.tsx
-import { Stack, Redirect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { Redirect, Stack } from 'expo-router';
+import { ActivityIndicator, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message'; // Import Toast
 

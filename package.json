@@ -13,8 +13,10 @@
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
     "@hookform/resolvers": "^5.0.1",
-    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-picker/picker": "^2.11.0",
+    "@react-navigation/native": "^7.1.14",
+    "@react-navigation/stack": "^7.4.2",
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",
     "expo": "^53.0.9",
@@ -24,7 +26,7 @@
     "expo-file-system": "~18.1.10",
     "expo-font": "~13.3.1",
     "expo-haptics": "~14.1.4",
-    "expo-image": "~2.1.7",
+    "expo-image": "~2.3.0",
     "expo-image-cropper": "^1.0.9",
     "expo-image-picker": "~16.1.4",
     "expo-linear-gradient": "~14.1.4",
@@ -35,8 +37,8 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
-    "expo-video": "~2.1.9",
-    "expo-web-browser": "~14.1.6",
+    "expo-video": "~2.2.2",
+    "expo-web-browser": "~14.2.0",
     "lucide-react": "^0.511.0",
     "lucide-react-native": "^0.511.0",
     "nanoid": "^5.1.5",
@@ -44,8 +46,9 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-hook-form": "^7.56.4",
-    "react-native": "0.79.2",
+    "react-native": "0.79.4",
     "react-native-dotenv": "^3.4.11",
+    "react-native-dropdown-picker": "^5.4.6",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-image-crop-picker": "^0.42.0",
     "react-native-image-resizer": "^1.4.5",
@@ -53,7 +56,7 @@
     "react-native-navigation-bar-color": "^2.0.2",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.10.0",
+    "react-native-screens": "~4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-toast-message": "^2.3.2",
@@ -73,10 +76,13 @@
     "typescript": "~5.8.3"
   },
   "doctor": {
-  "reactNativeDirectoryCheck": {
-    "exclude": ["react-native-navigation-bar-color", "react-native-swipe-list-view"],
-    "listUnknownPackages": false
-  }
-},
+    "reactNativeDirectoryCheck": {
+      "exclude": [
+        "react-native-navigation-bar-color",
+        "react-native-swipe-list-view"
+      ],
+      "listUnknownPackages": false
+    }
+  },
   "private": true
 }

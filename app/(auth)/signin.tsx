@@ -6,10 +6,11 @@ import { useRouter } from 'expo-router';
 import axios, { AxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { LinearGradient } from 'expo-linear-gradient';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '@/utils/env';
 import Toast from 'react-native-toast-message';
 import { useUser } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -36,6 +37,7 @@ const SigninScreen = () => {
     const logoScale = useRef(new Animated.Value(0.8)).current;
     const buttonScale = useRef(new Animated.Value(1)).current;
     const { refetchUser } = useUser();
+    const { login } = useAuth();
     const { control, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
     const { control: forgotControl, handleSubmit: handleForgotSubmit, reset: resetForgotForm, formState: { errors: forgotErrors } } = useForm<ForgotPasswordForm>();
 
@@ -94,8 +96,9 @@ const SigninScreen = () => {
             const token = response.data.token;
 
             if (token) {
-                await SecureStore.setItemAsync('userToken', token);
+                await login(token);
                 await SecureStore.setItemAsync('savedEmail', data.email);
+                await AsyncStorage.setItem('isSignedIn', 'true');
                 await refetchUser();
 
                 Toast.show({
@@ -104,10 +107,10 @@ const SigninScreen = () => {
                     visibilityTime: 2000,
                 });
 
-                // Navigate with a timestamp to trigger reload
-                router.push({
+                // Navigate to tabs
+                router.replace({
                     pathname: "/(tabs)",
-                    params: { reload: Date.now().toString() }
+                    params: { reload: Date.now().toString() },
                 });
             } else {
                 Toast.show({
@@ -195,7 +198,7 @@ const SigninScreen = () => {
                     style={{
                         flex: 1,
                         opacity: fadeAnim,
-                        transform: [{ translateY: slideAnim }]
+                        transform: [{ translateY: slideAnim }],
                     }}
                     className="px-6 py-10 justify-center"
                 >
@@ -206,7 +209,7 @@ const SigninScreen = () => {
                         style={{
                             transform: [{ scale: logoScale }],
                             alignItems: 'center',
-                            marginBottom: 32
+                            marginBottom: 32,
                         }}
                     >
                         <View className="bg-white/10 p-6 rounded-3xl backdrop-blur-sm border border-white/20 shadow-2xl">
@@ -225,13 +228,15 @@ const SigninScreen = () => {
 
                     <View className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl">
                         <View className="mb-6">
-                            <View className={`relative bg-white/90 rounded-2xl border-2 ${
-                                emailFocused ? 'border-yellow-400 shadow-lg' : 'border-transparent'
-                            } transition-all duration-200`}>
+                            <View
+                                className={`relative bg-white/90 rounded-2xl border-2 ${
+                                    emailFocused ? 'border-yellow-400 shadow-lg' : 'border-transparent'
+                                } transition-all duration-200`}
+                            >
                                 <Ionicons
                                     name="mail-outline"
                                     size={20}
-                                    color={emailFocused ? "#f59e0b" : "#6b7280"}
+                                    color={emailFocused ? '#f59e0b' : '#6b7280'}
                                     style={{ position: 'absolute', top: 16, left: 16, zIndex: 1 }}
                                 />
                                 <Controller
@@ -241,8 +246,8 @@ const SigninScreen = () => {
                                         required: 'Email is required',
                                         pattern: {
                                             value: /^\S+@\S+$/i,
-                                            message: 'Please enter a valid email'
-                                        }
+                                            message: 'Please enter a valid email',
+                                        },
                                     }}
                                     render={({ field: { onChange, value, onBlur } }) => (
                                         <TextInput
@@ -253,7 +258,6 @@ const SigninScreen = () => {
                                             value={value || ''}
                                             autoCapitalize="none"
                                             keyboardType="email-address"
-                                            // onFocus={() => setEmailFocused(true)}
                                             onBlur={() => {
                                                 onBlur();
                                                 setEmailFocused(false);
@@ -263,20 +267,20 @@ const SigninScreen = () => {
                                 />
                             </View>
                             {errors.email && (
-                                <Text className="text-red-400 mt-2 ml-2 font-medium">
-                                    {errors.email.message}
-                                </Text>
+                                <Text className="text-red-400 mt-2 ml-2 font-medium">{errors.email.message}</Text>
                             )}
                         </View>
 
                         <View className="mb-6">
-                            <View className={`relative bg-white/90 rounded-2xl border-2 ${
-                                passwordFocused ? 'border-yellow-400 shadow-lg' : 'border-transparent'
-                            } transition-all duration-200`}>
+                            <View
+                                className={`relative bg-white/90 rounded-2xl border-2 ${
+                                    passwordFocused ? 'border-yellow-400 shadow-lg' : 'border-transparent'
+                                } transition-all duration-200`}
+                            >
                                 <Ionicons
                                     name="lock-closed-outline"
                                     size={20}
-                                    color={passwordFocused ? "#f59e0b" : "#6b7280"}
+                                    color={passwordFocused ? '#f59e0b' : '#6b7280'}
                                     style={{ position: 'absolute', top: 16, left: 16, zIndex: 1 }}
                                 />
                                 <Controller
@@ -286,8 +290,8 @@ const SigninScreen = () => {
                                         required: 'Password is required',
                                         minLength: {
                                             value: 4,
-                                            message: 'Password must be at least 4 characters'
-                                        }
+                                            message: 'Password must be at least 4 characters',
+                                        },
                                     }}
                                     render={({ field: { onChange, value, onBlur } }) => (
                                         <TextInput
@@ -297,7 +301,6 @@ const SigninScreen = () => {
                                             onChangeText={onChange}
                                             value={value || ''}
                                             secureTextEntry={!showPassword}
-                                            // onFocus={() => setPasswordFocused(true)}
                                             onBlur={() => {
                                                 onBlur();
                                                 setPasswordFocused(false);
@@ -311,16 +314,14 @@ const SigninScreen = () => {
                                     activeOpacity={0.7}
                                 >
                                     <Ionicons
-                                        name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                                        name={showPassword ? 'eye-outline' : 'eye-off-offline'}
                                         size={22}
                                         color="#6b7280"
                                     />
                                 </TouchableOpacity>
                             </View>
                             {errors.password && (
-                                <Text className="text-red-400 mt-2 ml-2 font-medium">
-                                    {errors.password.message}
-                                </Text>
+                                <Text className="text-red-400 mt-2 ml-2 font-medium">{errors.password.message}</Text>
                             )}
                         </View>
 
@@ -343,11 +344,13 @@ const SigninScreen = () => {
                                         alignItems: 'center',
                                     }}
                                 >
-                                    <Text style={{
-                                        color: '#ffffff',
-                                        fontSize: 18,
-                                        fontWeight: 'bold'
-                                    }}>
+                                    <Text
+                                        style={{
+                                            color: '#ffffff',
+                                            fontSize: 18,
+                                            fontWeight: 'bold',
+                                        }}
+                                    >
                                         {loading ? 'Signing In...' : 'Sign In'}
                                     </Text>
                                 </LinearGradient>
@@ -370,9 +373,7 @@ const SigninScreen = () => {
                             onPress={() => setForgotModalVisible(true)}
                             activeOpacity={0.7}
                         >
-                            <Text className="text-white/70 font-medium">
-                                Forgot your password?
-                            </Text>
+                            <Text className="text-white/70 font-medium">Forgot your password?</Text>
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
@@ -401,8 +402,8 @@ const SigninScreen = () => {
                                             required: 'Email is required',
                                             pattern: {
                                                 value: /^\S+@\S+$/i,
-                                                message: 'Please enter a valid email'
-                                            }
+                                                message: 'Please enter a valid email',
+                                            },
                                         }}
                                         render={({ field: { onChange, value, onBlur } }) => (
                                             <TextInput

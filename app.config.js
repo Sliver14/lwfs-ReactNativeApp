@@ -7,8 +7,8 @@ export default {
         slug: "Loveworld-Foundation-School",
         version: "1.0.0",
         orientation: "portrait",
-        icon: "./assets/images/icon.png",
-        scheme: "Loveworld Foundation School",
+        icon: "./assets/images/logo.png",
+        scheme: "lwfs_app",
         deepLinking: true,
         userInterfaceStyle: "automatic",
         newArchEnabled: true,
@@ -30,11 +30,12 @@ export default {
         },
         plugins: [
             "expo-router",
+            "expo-web-browser",
             "expo-video",
             [
                 "expo-splash-screen",
                 {
-                    image: "./assets/images/icon.png",
+                    image: "./assets/images/splash-icon.png",
                     imageWidth: 200,
                     resizeMode: "contain",
                     backgroundColor: "#ffffff"

@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, Animated, Dimensions, Image } from "react-native";
-import { useForm, Controller } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
+import { API_URL } from '@/utils/env';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import { yupResolver } from "@hookform/resolvers/yup";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from "@react-native-picker/picker";
+import axios, { AxiosError } from "axios";
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Animated, Dimensions, Image, ScrollView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Toast from 'react-native-toast-message';
+import * as Yup from "yup";
 import country from "../../utils/country";
 import zones from "../../utils/zones";
-import axios, { AxiosError } from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '@/utils/env';
-import Toast from 'react-native-toast-message';
 
 const { width, height } = Dimensions.get('window');
 
@@ -295,12 +295,15 @@ const SignupScreen = () => {
                                 style={{
                                     color: '#374151',
                                     fontWeight: '500',
-                                    height: 56
+                                    height: 56,
+                                    backgroundColor: '#ffffff'
                                 }}
+                                dropdownIconColor="#374151"
+                                dropdownIconRippleColor="#f3f4f6"
                             >
                                 <Picker.Item label={placeholder} value="" color="#9ca3af" />
                                 {options.map((option, idx) => (
-                                    <Picker.Item key={idx} label={option} value={option} color="#374151" />
+                                    <Picker.Item key={idx} label={option} value={option} color="#1f2937" />
                                 ))}
                             </Picker>
                         </View>

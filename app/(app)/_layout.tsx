@@ -1,7 +1,7 @@
 // app/(app)/_layout.tsx
-import { Stack, Redirect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { Redirect, Stack } from 'expo-router';
+import { ActivityIndicator, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AppLayout() {

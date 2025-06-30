@@ -8,6 +8,7 @@ import { Alert, Dimensions, ScrollView, StatusBar, Text, TouchableOpacity, View,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from "../../../contexts/UserContext";
 
+
 export default function ProfileScreen({ navigation }: any) {
     const screenWidth = Dimensions.get('window').width;
     const { userDetails, logout } = useUser();
@@ -56,17 +57,17 @@ export default function ProfileScreen({ navigation }: any) {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            StatusBar.setBarStyle('light-content');
-            StatusBar.setBackgroundColor('#453ace');
-
-            return () => {
-                StatusBar.setBarStyle('light-content');
-                StatusBar.setBackgroundColor('#ffffff');
-            };
-        }, [])
-    );
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         StatusBar.setBarStyle('light-content');
+    //         StatusBar.setBackgroundColor('#453ace');
+    //
+    //         return () => {
+    //             StatusBar.setBarStyle('dark-content');
+    //             StatusBar.setBackgroundColor('#ffffff');
+    //         };
+    //     }, [])
+    // );
 
     const handleLogout = async () => {
         Alert.alert(

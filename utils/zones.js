@@ -1,6 +1,6 @@
 // src/utils/zones.js
 
-export const zones = [
+  const zones = [
   "Aba Zone",
   "Abuja Zone 1",
   "Abuja Zone 2",

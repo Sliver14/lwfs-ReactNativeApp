@@ -1,4 +1,6 @@
 // countryCodes.js (Dialing Codes)
+import {string} from "yup";
+
 const country = [
     "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda",
     "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
