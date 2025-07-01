@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Animated, Dimensions, StatusBar, Modal } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import axios, { AxiosError } from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { LinearGradient } from 'expo-linear-gradient';
-import { API_URL } from '@/utils/env';
-import Toast from 'react-native-toast-message';
-import { useUser } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUser } from "@/contexts/UserContext";
+import { API_URL } from '@/utils/env';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios, { AxiosError } from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import React, { useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Animated, Dimensions, Image, Modal, StatusBar, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 const { width, height } = Dimensions.get('window');
 
@@ -314,7 +314,7 @@ const SigninScreen = () => {
                                     activeOpacity={0.7}
                                 >
                                     <Ionicons
-                                        name={showPassword ? 'eye-outline' : 'eye-off-offline'}
+                                        name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                                         size={22}
                                         color="#6b7280"
                                     />
