@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext'; // Import useAut
 import { LiveTvProvider } from "@/contexts/LiveTvContext";
 import { UserCartProvider } from "@/contexts/UserCartContext";
 import { UserProvider } from "@/contexts/UserContext";
+import { VideoPlayerProvider } from '@/contexts/VideoPlayerContext';
 import * as Linking from 'expo-linking';
 import { Stack, useRouter } from "expo-router"; // Import Stack
 import { useEffect } from 'react';
@@ -13,7 +14,7 @@ import "./globals.css";
 
 // This component will handle the top-level routing logic based on auth state
 function RootNavigator() {
-    const { user, loading } = useAuth(); // Use auth context to determine initial route
+    const { userToken, loading } = useAuth(); // Use auth context to determine initial route
     const router = useRouter(); // useRouter is now available because of the Stack below
 
     // Deep linking logic remains the same
@@ -80,8 +81,12 @@ export default function RootLayoutWrapper() {
                 <UserProvider>
                     <UserCartProvider>
                         <LiveTvProvider>
-                            {/* Render the RootNavigator which contains the main Stack and routing logic */}
-                            <RootNavigator />
+                            <VideoPlayerProvider>
+                                <Stack>
+                                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                                    <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                                </Stack>
+                            </VideoPlayerProvider>
                         </LiveTvProvider>
                     </UserCartProvider>
                 </UserProvider>

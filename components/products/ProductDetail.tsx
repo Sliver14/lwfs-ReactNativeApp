@@ -1,19 +1,28 @@
 // components/product/ProductDetail.tsx
+import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
-import { Feather, MaterialIcons, AntDesign } from '@expo/vector-icons';
-import { Card } from '../shared/Card';
-import { Button } from '../shared/Button';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Badge } from '../shared/Badge';
-import { Product } from '../../types';
-import {Image} from "react-native";
-import {useRouter} from "expo-router";
+import { Button } from '../shared/Button';
+import { Card } from '../shared/Card';
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+  imageUrl?: string;
+  iconName?: string;
+}
 
 interface ProductDetailProps {
     product: Product;
     onBack: () => void;
     onAddToCart: (product: Product) => void;
     cartCount: number;
+    onCartPress?: () => void;
 }
 
 const getIconComponent = (iconName: string) => {
@@ -30,10 +39,10 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                                                                 product,
                                                                 onBack,
                                                                 onAddToCart,
-                                                                cartCount
+                                                                cartCount,
+                                                                onCartPress
                                                             }) => {
-    const IconComponent = getIconComponent(product.iconName);
-    const router = useRouter();
+    const IconComponent = getIconComponent(product.iconName || '');
 
     return (
         <ScrollView className="flex-1 bg-gray-50 mb-[50px]" showsVerticalScrollIndicator={false}>
@@ -42,14 +51,14 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                     <TouchableOpacity onPress={onBack} className="p-2">
                         <Feather name="arrow-left" size={20} color="#6B7280"/>
                     </TouchableOpacity>
-                    <View className="relative" onPress={() => router.push("/cart")}>
-                        <Feather name="shopping-cart" size={20} color="#6B7280" />
+                    <TouchableOpacity className="relative p-2" onPress={onCartPress}>
+                        <Feather name="shopping-cart" size={28} color="#6B7280" />
                         {cartCount > 0 && (
                             <Badge className="absolute -top-1 -right-1">
                                 {cartCount}
                             </Badge>
                         )}
-                    </View>
+                    </TouchableOpacity>
                 </View>
             </View>
 

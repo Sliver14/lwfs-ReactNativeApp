@@ -1,0 +1,361 @@
+{
+  "designSystem": {
+    "name": "LWFS App Design System",
+    "version": "1.0",
+    "platform": "React Native/Expo",
+    "designPhilosophy": "Modern card-based design with vibrant gradients, clean typography, and intuitive navigation patterns",
+    
+    "colorSystem": {
+      "primary": {
+        "blue": "#4A90E2",
+        "purple": "#7B68EE",
+        "gradient": "linear-gradient(135deg, #4A90E2 0%, #7B68EE 100%)"
+      },
+      "secondary": {
+        "orange": "#FF8C42",
+        "yellow": "#FFD93D",
+        "pink": "#FF6B9D",
+        "gradient": "linear-gradient(135deg, #FF8C42 0%, #FFD93D 100%)"
+      },
+      "accent": {
+        "success": "#4CAF50",
+        "warning": "#FF9800",
+        "error": "#F44336",
+        "info": "#2196F3"
+      },
+      "neutral": {
+        "white": "#FFFFFF",
+        "lightGray": "#F5F7FA",
+        "mediumGray": "#E1E8ED",
+        "darkGray": "#657786",
+        "charcoal": "#14171A",
+        "black": "#000000"
+      },
+      "backgrounds": {
+        "light": "#FFFFFF",
+        "dark": "#0D1117",
+        "cardLight": "#FFFFFF",
+        "cardDark": "#161B22",
+        "surfaceLight": "#F6F8FA",
+        "surfaceDark": "#21262D"
+      }
+    },
+
+    "typography": {
+      "fontFamily": {
+        "primary": "SF Pro Display, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto",
+        "secondary": "SF Pro Text, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto",
+        "mono": "SF Mono, Monaco, Consolas, monospace"
+      },
+      "fontSizes": {
+        "xs": 12,
+        "sm": 14,
+        "base": 16,
+        "lg": 18,
+        "xl": 20,
+        "2xl": 24,
+        "3xl": 30,
+        "4xl": 36
+      },
+      "fontWeights": {
+        "light": 300,
+        "regular": 400,
+        "medium": 500,
+        "semibold": 600,
+        "bold": 700,
+        "extrabold": 800
+      },
+      "lineHeights": {
+        "tight": 1.2,
+        "normal": 1.5,
+        "relaxed": 1.75
+      }
+    },
+
+    "spacing": {
+      "baseUnit": 4,
+      "scale": {
+        "xs": 4,
+        "sm": 8,
+        "md": 16,
+        "lg": 24,
+        "xl": 32,
+        "2xl": 48,
+        "3xl": 64
+      }
+    },
+
+    "borderRadius": {
+      "none": 0,
+      "sm": 6,
+      "md": 12,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24,
+      "full": 9999
+    },
+
+    "shadows": {
+      "light": {
+        "sm": "0px 1px 3px rgba(0, 0, 0, 0.1)",
+        "md": "0px 4px 12px rgba(0, 0, 0, 0.15)",
+        "lg": "0px 8px 25px rgba(0, 0, 0, 0.15)"
+      },
+      "dark": {
+        "sm": "0px 1px 3px rgba(0, 0, 0, 0.3)",
+        "md": "0px 4px 12px rgba(0, 0, 0, 0.4)",
+        "lg": "0px 8px 25px rgba(0, 0, 0, 0.5)"
+      }
+    },
+
+    "components": {
+      "cards": {
+        "primary": {
+          "backgroundColor": "gradient or solid color",
+          "borderRadius": "lg",
+          "padding": "md",
+          "shadow": "md",
+          "minHeight": 120,
+          "contentAlignment": "flex-start",
+          "titleColor": "white or contrasting color",
+          "descriptionColor": "white with opacity or contrasting color"
+        },
+        "secondary": {
+          "backgroundColor": "white or surface color",
+          "borderRadius": "md",
+          "padding": "md",
+          "shadow": "sm",
+          "border": "1px solid neutral.mediumGray",
+          "contentAlignment": "flex-start"
+        },
+        "course": {
+          "imageAspectRatio": "16:9 or 4:3",
+          "titlePosition": "below image",
+          "pricePosition": "bottom right",
+          "favoriteIcon": "top right overlay",
+          "ratingDisplay": "stars with number"
+        }
+      },
+
+      "buttons": {
+        "primary": {
+          "backgroundColor": "primary.gradient or primary.blue",
+          "textColor": "white",
+          "borderRadius": "lg",
+          "padding": "12px 24px",
+          "fontWeight": "semibold",
+          "fontSize": "base",
+          "minHeight": 48
+        },
+        "secondary": {
+          "backgroundColor": "transparent",
+          "textColor": "primary.blue",
+          "border": "2px solid primary.blue",
+          "borderRadius": "lg",
+          "padding": "12px 24px",
+          "fontWeight": "semibold"
+        },
+        "ghost": {
+          "backgroundColor": "transparent",
+          "textColor": "primary.blue",
+          "borderRadius": "lg",
+          "padding": "12px 24px",
+          "fontWeight": "medium"
+        }
+      },
+
+      "inputs": {
+        "default": {
+          "backgroundColor": "neutral.lightGray",
+          "borderRadius": "md",
+          "padding": "16px",
+          "fontSize": "base",
+          "border": "none",
+          "focusBorder": "2px solid primary.blue"
+        },
+        "search": {
+          "backgroundColor": "neutral.lightGray",
+          "borderRadius": "xl",
+          "padding": "12px 16px",
+          "leftIcon": "search icon",
+          "placeholder": "medium gray text"
+        }
+      },
+
+      "navigation": {
+        "tabBar": {
+          "backgroundColor": "white or surface color",
+          "height": 70,
+          "itemSpacing": "equal distribution",
+          "activeColor": "primary.blue",
+          "inactiveColor": "neutral.darkGray",
+          "iconSize": 24,
+          "labelFontSize": "xs",
+          "labelFontWeight": "medium"
+        },
+        "header": {
+          "backgroundColor": "transparent or white",
+          "height": 60,
+          "titleAlignment": "center",
+          "titleFontSize": "lg",
+          "titleFontWeight": "semibold",
+          "backButton": "arrow-left icon",
+          "rightActions": "icon buttons"
+        }
+      },
+
+      "lists": {
+        "courseGrid": {
+          "columns": 2,
+          "spacing": "md",
+          "itemAspectRatio": "3:4",
+          "scrollDirection": "vertical"
+        },
+        "horizontalScroll": {
+          "itemWidth": "80% of screen width",
+          "spacing": "md",
+          "showsIndicators": false,
+          "snapToInterval": true
+        }
+      },
+
+      "avatars": {
+        "sizes": {
+          "sm": 32,
+          "md": 48,
+          "lg": 64,
+          "xl": 96
+        },
+        "borderRadius": "full",
+        "borderColor": "white",
+        "borderWidth": 2,
+        "fallbackColor": "gradient or solid color"
+      },
+
+      "modals": {
+        "overlay": {
+          "backgroundColor": "rgba(0, 0, 0, 0.5)",
+          "backdropBlur": "optional"
+        },
+        "content": {
+          "backgroundColor": "white or surface",
+          "borderRadius": "xl",
+          "padding": "xl",
+          "maxWidth": "90% of screen",
+          "shadow": "lg"
+        }
+      }
+    },
+
+    "layouts": {
+      "screen": {
+        "padding": "md",
+        "backgroundColor": "neutral.lightGray or backgrounds.light",
+        "safeArea": true
+      },
+      "container": {
+        "maxWidth": "100%",
+        "padding": "md",
+        "marginHorizontal": "auto"
+      },
+      "section": {
+        "marginBottom": "xl",
+        "titleMarginBottom": "md"
+      }
+    },
+
+    "patterns": {
+      "promotionalBanner": {
+        "style": "gradient card with large text and CTA button",
+        "height": 140,
+        "borderRadius": "lg",
+        "contentLayout": "left-aligned text with right-aligned graphic",
+        "textHierarchy": "large title, smaller subtitle, prominent CTA"
+      },
+      "courseCard": {
+        "style": "image thumbnail with overlay text and bottom metadata",
+        "imageHeight": "60% of card height",
+        "textOverlay": "gradient overlay for readability",
+        "metadataLayout": "price, rating, enrollment button"
+      },
+      "categoryFilter": {
+        "style": "horizontal scrollable pills",
+        "activeState": "filled with primary color",
+        "inactiveState": "outlined with gray border",
+        "spacing": "sm between items"
+      },
+      "livestreamInterface": {
+        "videoPlayerAspectRatio": "16:9",
+        "chatPanelWidth": "30% of screen or overlay",
+        "controlsPosition": "overlay on video",
+        "viewerCountPosition": "top left overlay"
+      }
+    },
+
+    "animations": {
+      "durations": {
+        "fast": 150,
+        "normal": 300,
+        "slow": 500
+      },
+      "easings": {
+        "easeOut": "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+        "easeInOut": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "spring": "spring(damping: 0.8, stiffness: 100)"
+      },
+      "transitions": {
+        "screenTransition": "slide from right",
+        "modalPresentation": "slide up from bottom",
+        "cardHover": "scale(1.02) with shadow increase",
+        "buttonPress": "scale(0.98)"
+      }
+    },
+
+    "iconography": {
+      "style": "Feather icons or similar outlined style",
+      "sizes": {
+        "sm": 16,
+        "md": 20,
+        "lg": 24,
+        "xl": 32
+      },
+      "strokeWidth": 2,
+      "color": "inherits from parent or theme"
+    },
+
+    "breakpoints": {
+      "sm": 375,
+      "md": 768,
+      "lg": 1024,
+      "xl": 1280
+    },
+
+    "accessibility": {
+      "minimumTapTarget": 44,
+      "colorContrast": "WCAG AA compliant",
+      "focusIndicator": "2px solid primary color with offset",
+      "screenReaderSupport": true
+    },
+
+    "designTokens": {
+      "borderWidth": {
+        "thin": 1,
+        "medium": 2,
+        "thick": 4
+      },
+      "opacity": {
+        "disabled": 0.4,
+        "hover": 0.8,
+        "overlay": 0.6
+      },
+      "zIndex": {
+        "base": 0,
+        "dropdown": 10,
+        "sticky": 20,
+        "overlay": 30,
+        "modal": 40,
+        "tooltip": 50
+      }
+    }
+  }
+}

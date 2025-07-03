@@ -43,7 +43,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAd
                 <View className="flex-row justify-between items-center">
                     <Text className="font-bold text-sm">{product.price} Espees</Text>
                     <TouchableOpacity
-                        className="bg-[#453ace] px-3 py-1 rounded-full"
+                        className="bg-[#3b82f6] px-3 py-1 rounded-full"
                         onPress={(e) => {
                             e.stopPropagation();
                             onAddToCart(product);

@@ -1,12 +1,12 @@
-import React, { useState, useRef } from 'react';
-import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    Dimensions,
-} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import React, { useRef, useState } from 'react';
+import {
+    Dimensions,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width * 0.85; // Card takes 85% of screen width
@@ -174,7 +174,7 @@ export default function EventCarousel() {
                         onPress={() => scrollToCard(index)}
                         className="w-2 h-2 rounded-full mx-1"
                         style={{
-                            backgroundColor: index === activeIndex ? '#453ace' : '#d1d5db',
+                            backgroundColor: index === activeIndex ? '#3b82f6' : '#d1d5db',
                             width: index === activeIndex ? 8 : 6,
                             height: index === activeIndex ? 8 : 6,
                         }}

@@ -1,11 +1,11 @@
+import { useUser } from '@/contexts/UserContext';
 import { API_URL } from '@/utils/env';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
-import { Alert, FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useUser } from '@/contexts/UserContext';
 import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface OrderItem {
     id: string;
@@ -82,7 +82,8 @@ export default function OrderHistoryScreen() {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
+            <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
             <View className="flex-row items-center px-4 py-3 bg-[#453ace]">
                 <TouchableOpacity onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="white" />

@@ -1,6 +1,6 @@
 import { ArrowLeft, CheckCircle, Home, RefreshCw, Sparkles, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { SafeAreaView, StatusBar, View } from 'react-native';
 
 const PaymentSuccessPage = ({ onBack, onGoHome }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -91,6 +91,8 @@ const PaymentFailedPage = ({ onBack, onRetry }) => {
   }, []);
 
   return (
+    <SafeAreaView className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
     <View className="payment-container error-bg">
       {/* Animated Background Elements */}
       <View className="error-waves">
@@ -145,6 +147,7 @@ const PaymentFailedPage = ({ onBack, onRetry }) => {
         </View>
       </View>
     </View>
+    </SafeAreaView>
   );
 };
 

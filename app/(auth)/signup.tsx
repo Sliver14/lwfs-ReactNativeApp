@@ -1,14 +1,27 @@
+import SearchablePicker from '@/components/shared/SearchablePicker';
 import { API_URL } from '@/utils/env';
 import { Ionicons } from '@expo/vector-icons';
 import { yupResolver } from "@hookform/resolvers/yup";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Picker } from "@react-native-picker/picker";
 import axios, { AxiosError } from "axios";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Animated, Dimensions, Image, ScrollView, StatusBar, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    Animated,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from "react-native";
 import Toast from 'react-native-toast-message';
 import * as Yup from "yup";
 import country from "../../utils/country";
@@ -65,6 +78,8 @@ const SignupScreen = () => {
     const [loading, setLoading] = useState(false);
     const [focusedFields, setFocusedFields] = useState<{ [key: string]: boolean }>({});
     const [currentStep, setCurrentStep] = useState(1);
+    const [showCountryPicker, setShowCountryPicker] = useState(false);
+    const [showZonePicker, setShowZonePicker] = useState(false);
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
@@ -231,7 +246,6 @@ const SignupScreen = () => {
                             keyboardType={keyboardType}
                             secureTextEntry={secureTextEntry ? !showPassword : false}
                             autoCapitalize={name === 'email' || name === 'kcUsername' ? 'none' : 'words'}
-                            // onFocus={() => handleFieldFocus(name)}
                             onBlur={() => {
                                 onBlur();
                                 handleFieldBlur(name);
@@ -267,201 +281,245 @@ const SignupScreen = () => {
         options: string[],
         icon: string
     ) => (
-        <View className="mb-4">
-            <View className={`relative bg-white/90 rounded-2xl border-2 ${
-                focusedFields[name] ? 'border-yellow-400 shadow-lg' : 'border-transparent'
-            } transition-all duration-200`}>
-                <Ionicons
-                    name={icon as any}
-                    size={20}
-                    color={focusedFields[name] ? "#f59e0b" : "#6b7280"}
-                    style={{ position: 'absolute', top: 16, left: 16, zIndex: 1 }}
-                />
-                <Controller
-                    control={control}
-                    name={name}
-                    render={({ field: { onChange, value, onBlur } }) => (
-                        <View className="pl-12 pr-4">
-                            <Picker
-                                selectedValue={value}
-                                onValueChange={(itemValue) => {
-                                    onChange(itemValue);
-                                    // handleFieldFocus(name); // Simulate focus on value change
-                                }}
-                                onBlur={() => {
-                                    onBlur();
-                                    handleFieldBlur(name);
-                                }}
-                                style={{
-                                    color: '#374151',
-                                    fontWeight: '500',
-                                    height: 56,
-                                    backgroundColor: '#ffffff'
-                                }}
-                                dropdownIconColor="#374151"
-                                dropdownIconRippleColor="#f3f4f6"
-                            >
-                                <Picker.Item label={placeholder} value="" color="#9ca3af" />
-                                {options.map((option, idx) => (
-                                    <Picker.Item key={idx} label={option} value={option} color="#1f2937" />
-                                ))}
-                            </Picker>
-                        </View>
+        <Controller
+            control={control}
+            name={name}
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
+                <View style={{ marginBottom: 16 }}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (name === 'country') {
+                                setShowCountryPicker(true);
+                            } else if (name === 'zone') {
+                                setShowZonePicker(true);
+                            }
+                        }}
+                        style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            borderRadius: 12,
+                            paddingHorizontal: 16,
+                            paddingVertical: 14,
+                            borderWidth: 1,
+                            borderColor: error ? '#ef4444' : focusedFields[name] ? '#facc15' : 'rgba(255,255,255,0.2)'
+                        }}
+                    >
+                        <Ionicons name={icon as any} size={20} color={error ? '#ef4444' : '#fff'} style={{ marginRight: 12 }} />
+                        <Text style={{ 
+                            flex: 1,
+                            color: value ? '#fff' : 'rgba(255,255,255,0.5)',
+                            fontSize: 16
+                        }}>
+                            {value || placeholder}
+                        </Text>
+                        <Ionicons name="chevron-down" size={20} color="#fff" />
+                    </TouchableOpacity>
+                    {error && (
+                        <Text style={{ color: '#ef4444', marginTop: 8, marginLeft: 8 }}>
+                            {error.message}
+                        </Text>
                     )}
-                />
-            </View>
-            {errors[name] && (
-                <Text className="text-red-400 mt-2 ml-2 font-medium text-sm">
-                    {errors[name]?.message}
-                </Text>
+
+                    {name === 'country' && (
+                        <SearchablePicker
+                            isVisible={showCountryPicker}
+                            onClose={() => setShowCountryPicker(false)}
+                            onSelect={onChange}
+                            items={country}
+                            selectedValue={value}
+                            title="Select Country"
+                            placeholder="Search countries..."
+                        />
+                    )}
+
+                    {name === 'zone' && (
+                        <SearchablePicker
+                            isVisible={showZonePicker}
+                            onClose={() => setShowZonePicker(false)}
+                            onSelect={onChange}
+                            items={zones}
+                            selectedValue={value}
+                            title="Select Zone"
+                            placeholder="Search zones..."
+                        />
+                    )}
+                </View>
             )}
-        </View>
+        />
     );
 
     return (
-        <>
-            <StatusBar barStyle="light-content" backgroundColor="#1e1b4b" />
-            <LinearGradient
-                colors={['#1e1b4b', '#3730a3', '#4f46e5']}
+        <SafeAreaView className="flex-1" style={{ backgroundColor: '#000' }}>
+            <StatusBar barStyle="light-content" backgroundColor="#000" />
+            <KeyboardAvoidingView 
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 25}
             >
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}
+                <LinearGradient
+                    colors={['#1e1b4b', '#3730a3', '#4f46e5']}
+                    style={{ flex: 1 }}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
                 >
-                    <Animated.View
-                        style={{
-                            flex: 1,
-                            opacity: fadeAnim,
-                            transform: [{ translateY: slideAnim }]
+                    <ScrollView 
+                        contentContainerStyle={{ 
+                            flexGrow: 1,
+                            paddingBottom: 40
                         }}
-                        className="px-6 py-8"
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
                     >
-                        <View className="absolute top-10 right-0 w-32 h-32 bg-white/5 rounded-full" />
-                        <View className="absolute bottom-40 left-0 w-24 h-24 bg-white/5 rounded-full" />
-
                         <Animated.View
                             style={{
-                                transform: [{ scale: logoScale }],
-                                alignItems: 'center',
-                                marginBottom: 24
+                                flex: 1,
+                                opacity: fadeAnim,
+                                transform: [{ translateY: slideAnim }],
+                                paddingHorizontal: 24,
+                                paddingTop: height * 0.05,
+                                paddingBottom: 24,
+                                minHeight: height,
+                                justifyContent: 'space-between'
                             }}
                         >
-                            <View className="bg-white/10 p-4 rounded-3xl backdrop-blur-sm border border-white/20 shadow-2xl">
-                                <Image
-                                    source={require('@/assets/images/welcome/Logo-shadow.png')}
-                                    className="w-[60px] h-[60px]"
-                                    resizeMode="contain"
-                                />
+                            <View>
+                                {/* Logo Section */}
+                                <Animated.View
+                                    style={{
+                                        alignItems: 'center',
+                                        marginBottom: 32,
+                                        transform: [{ scale: logoScale }],
+                                    }}
+                                >
+                                    <Image
+                                        source={require('../../assets/images/welcome/Logo-shadow.png')}
+                                        style={{ width: 100, height: 100, resizeMode: 'contain' }}
+                                    />
+                                    <View style={{ alignItems: 'center', marginTop: 16 }}>
+                                        <Text style={{ color: '#facc15', fontSize: 18, fontWeight: '600' }}>
+                                            LOVEWORLD
+                                        </Text>
+                                        <Text style={{ color: '#fff', fontSize: 22, fontWeight: 'bold' }}>
+                                            FOUNDATION SCHOOL
+                                        </Text>
+                                    </View>
+                                </Animated.View>
+
+                                {/* Progress Indicator */}
+                                <View style={{ 
+                                    flexDirection: 'row', 
+                                    justifyContent: 'center', 
+                                    marginBottom: 24,
+                                    paddingHorizontal: 16 
+                                }}>
+                                    <View style={{ 
+                                        flex: 1,
+                                        height: 4,
+                                        backgroundColor: currentStep === 1 ? '#facc15' : '#fff',
+                                        borderRadius: 2,
+                                        marginRight: 8
+                                    }} />
+                                    <View style={{ 
+                                        flex: 1,
+                                        height: 4,
+                                        backgroundColor: currentStep === 2 ? '#facc15' : '#fff',
+                                        borderRadius: 2,
+                                        marginLeft: 8
+                                    }} />
+                                </View>
+
+                                {/* Form Section */}
+                                <View>
+                                    {currentStep === 1 ? (
+                                        <>
+                                            {renderInputField("firstName", "First Name", "person-outline")}
+                                            {renderInputField("lastName", "Last Name", "person-outline")}
+                                            {renderInputField("phoneNumber", "Phone Number", "call-outline", "numeric")}
+                                            {renderPickerField("country", "Select Country", country, "globe-outline")}
+                                            {renderInputField("city", "City", "location-outline")}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {renderPickerField("zone", "Select Zone", zones, "map-outline")}
+                                            {renderInputField("church", "Church", "business-outline")}
+                                            {renderInputField("email", "Email", "mail-outline", "email-address")}
+                                            {renderInputField("kcUsername", "Kingschat ID", "person-circle-outline")}
+                                            {renderInputField("password", "Password", "lock-closed-outline", "default", true)}
+                                            {renderInputField("confirmPassword", "Confirm Password", "lock-closed-outline", "default", true)}
+                                        </>
+                                    )}
+                                </View>
                             </View>
-                        </Animated.View>
 
-                        <View className="items-center mb-8">
-                            <Text className="text-xl font-bold text-white mb-2 text-center">Welcome to Loveworld Foundation School!</Text>
-                            <Text className="text-base text-white/70 text-center">Create your account to get started - Step {currentStep} of 2</Text>
-                        </View>
-
-                        <View className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 shadow-2xl">
-                            <Text className="text-white font-bold text-lg mb-4 text-center">
-                                {currentStep === 1 ? "Personal Information" : "Account Details"}
-                            </Text>
-
-                            {currentStep === 1 ? (
-                                <>
-                                    {renderInputField('firstName', 'First Name', 'person-outline')}
-                                    {renderInputField('lastName', 'Last Name', 'person-outline')}
-                                    {renderInputField('phoneNumber', 'Phone Number', 'call-outline', 'phone-pad')}
-                                    {renderPickerField('country', 'Select your country', country, 'location-outline')}
-                                    {renderInputField('city', 'City', 'location-outline')}
-                                </>
-                            ) : (
-                                <>
-                                    {renderPickerField('zone', 'Select your zone', zones, 'business-outline')}
-                                    {renderInputField('church', 'Church', 'home-outline')}
-                                    {renderInputField('email', 'Email Address', 'mail-outline', 'email-address')}
-                                    {renderInputField('kcUsername', 'Kingschat ID', 'person-circle-outline', 'default')}
-                                    {renderInputField('password', 'Password', 'lock-closed-outline', 'default', true)}
-                                    {renderInputField('confirmPassword', 'Confirm Password', 'lock-closed-outline', 'default', true)}
-                                </>
-                            )}
-
-                            <View className="flex-row space-x-3 mt-4">
-                                {currentStep === 2 && (
-                                    <Animated.View style={{ transform: [{ scale: buttonScale }], flex: 1 }}>
-                                        <TouchableOpacity
-                                            className="rounded-2xl py-4 items-center shadow-lg"
-                                            onPress={() => setCurrentStep(1)}
-                                            onPressIn={onButtonPressIn}
-                                            onPressOut={onButtonPressOut}
-                                            activeOpacity={0.9}
-                                        >
-                                            <LinearGradient
-                                                colors={['#6b7280', '#4b5563']}
-                                                start={{ x: 0, y: 0 }}
-                                                end={{ x: 1, y: 0 }}
-                                                style={{
-                                                    flex: 1,
-                                                    width: '100%',
-                                                    borderRadius: 16,
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                    paddingVertical: 16
-                                                }}
-                                            >
-                                                <Text className="text-white font-bold text-lg">Back</Text>
-                                            </LinearGradient>
-                                        </TouchableOpacity>
-                                    </Animated.View>
-                                )}
-                                <Animated.View style={{ transform: [{ scale: buttonScale }], flex: 1 }}>
+                            {/* Buttons Section - Now in a separate View at the bottom */}
+                            <View style={{ marginTop: 16 }}>
+                                <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
                                     <TouchableOpacity
-                                        className="rounded-2xl py-4 items-center shadow-lg"
-                                        disabled={loading}
                                         onPress={handleSubmit(onSubmit)}
                                         onPressIn={onButtonPressIn}
                                         onPressOut={onButtonPressOut}
-                                        activeOpacity={0.9}
+                                        disabled={loading}
+                                        style={{
+                                            backgroundColor: '#facc15',
+                                            paddingVertical: 16,
+                                            borderRadius: 12,
+                                            alignItems: 'center',
+                                            opacity: loading ? 0.7 : 1,
+                                        }}
                                     >
-                                        <LinearGradient
-                                            colors={loading ? ['#9ca3af', '#6b7280'] : ['#f59e0b', '#f97316']}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 1, y: 0 }}
-                                            style={{
-                                                flex: 1,
-                                                width: '100%',
-                                                borderRadius: 16,
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                paddingVertical: 16
-                                            }}
-                                        >
-                                            <Text className="text-white font-bold text-lg">
-                                                {loading ? 'Creating Account...' : currentStep === 1 ? 'Next' : 'Create Account'}
-                                            </Text>
-                                        </LinearGradient>
+                                        <Text style={{ color: '#1e1b4b', fontSize: 16, fontWeight: 'bold' }}>
+                                            {currentStep === 1 ? 'Next' : (loading ? 'Creating Account...' : 'Create Account')}
+                                        </Text>
                                     </TouchableOpacity>
                                 </Animated.View>
-                            </View>
-                        </View>
 
-                        <View className="items-center mt-6">
-                            <TouchableOpacity
-                                onPress={() => router.push('/signin')}
-                                activeOpacity={0.7}
-                                className="bg-white/10 px-6 py-3 rounded-full backdrop-blur-sm border border-white/20"
-                            >
-                                <Text className="text-white font-semibold text-center">
-                                    Already have an account? <Text className="text-yellow-300 font-bold">Sign In</Text>
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </Animated.View>
-                </ScrollView>
-            </LinearGradient>
+                                {currentStep === 2 && (
+                                    <TouchableOpacity
+                                        onPress={() => setCurrentStep(1)}
+                                        style={{
+                                            marginTop: 16,
+                                            paddingVertical: 12,
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <Text style={{ color: '#fff', fontSize: 16 }}>
+                                            Back to Step 1
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+
+                                <View style={{ 
+                                    marginTop: 24,
+                                    marginBottom: 16,
+                                    alignItems: 'center'
+                                }}>
+                                    <TouchableOpacity
+                                        onPress={() => router.push('/signin')}
+                                        style={{ 
+                                            flexDirection: 'row',
+                                            alignItems: 'center',
+                                            backgroundColor: 'rgba(255,255,255,0.1)',
+                                            paddingVertical: 12,
+                                            paddingHorizontal: 20,
+                                            borderRadius: 20
+                                        }}
+                                    >
+                                        <Text style={{ color: '#fff', marginRight: 4 }}>
+                                            Already have an account?
+                                        </Text>
+                                        <Text style={{ color: '#facc15', fontWeight: 'bold' }}>
+                                            Sign In
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Animated.View>
+                    </ScrollView>
+                </LinearGradient>
+            </KeyboardAvoidingView>
             <Toast />
-        </>
+        </SafeAreaView>
     );
 };
 

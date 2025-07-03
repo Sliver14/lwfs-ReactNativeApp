@@ -1,50 +1,200 @@
-# Welcome to your Expo app 👋
+# LWFS App - Loveworld Foundation School
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A comprehensive React Native/Expo mobile application for Loveworld Foundation School, featuring live TV streaming, e-commerce store, user authentication, and profile management.
 
-## Get started
+## 🚀 Features
 
-1. Install dependencies
+### 📺 Live TV & Chat
+- **Live Video Streaming**: Watch live worship programs and events
+- **Real-time Chat**: Interactive live chat with colorful user avatars
+- **Viewer Count**: Real-time viewer statistics
+- **Fullscreen Mode**: Immersive viewing experience
+- **Auto-scroll Chat**: Smooth chat scrolling with user initials
 
+### 🛍️ E-commerce Store
+- **Product Browsing**: Browse school uniforms, supplies, and merchandise
+- **Smart Search**: Real-time product search with filtering
+- **Shopping Cart**: Add/remove items with quantity management
+- **Secure Checkout**: Integrated payment processing
+- **Promotion Carousel**: Auto-scrolling promotional banners
+- **Product Categories**: Filter by Pastors, Principals, Teachers, Students
+
+### 👤 User Management
+- **Authentication**: Secure sign-in/sign-up with email verification
+- **Profile Management**: Update personal information and preferences
+- **Order History**: Track past purchases and order status
+- **Password Reset**: Secure password recovery system
+
+### 🎓 Educational Integration
+- **Online Classes**: Direct access to online learning platform
+- **Quick Actions**: Easy navigation to educational resources
+- **School Information**: Access to school updates and announcements
+
+### 🎨 Modern UI/UX
+- **Dark Mode Support**: Beautiful dark and light themes
+- **Responsive Design**: Optimized for all screen sizes
+- **Smooth Animations**: Engaging user interactions
+- **Tab Navigation**: Intuitive bottom tab navigation
+- **Sidebar Menu**: Quick access to all features
+
+## 🛠️ Technical Stack
+
+- **Framework**: React Native with Expo
+- **Navigation**: Expo Router (file-based routing)
+- **State Management**: React Context API
+- **Styling**: NativeWind (Tailwind CSS for React Native)
+- **Icons**: Expo Vector Icons (Feather)
+- **HTTP Client**: Axios
+- **Video Player**: Expo AV
+- **Payment**: Custom payment integration
+- **Authentication**: Custom auth system with JWT
+
+## 📱 Screenshots
+
+The app includes:
+- **Home Screen**: Welcome with LWFS logo and quick actions
+- **Live TV**: Video player with live chat
+- **Store**: Product browsing with search and cart
+- **Profile**: User account management
+- **Authentication**: Sign-in/sign-up flows
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Expo CLI
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd lwfs_app
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-2. Start the app
-
-   ```bash
-   npx expo start
+3. **Environment Setup**
+   Create a `.env` file in the root directory:
+   ```env
+   API_URL=your_api_endpoint
+   APP_NAME=LWFS App
    ```
 
-In the output, you'll find options to open the app in a
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+5. **Run on device/simulator**
+   - Press `a` for Android
+   - Press `i` for iOS
+   - Scan QR code with Expo Go app
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 📁 Project Structure
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+lwfs_app/
+├── app/                    # Main app screens (Expo Router)
+│   ├── (app)/             # Protected app routes
+│   │   ├── (tabs)/        # Tab navigation
+│   │   └── index.tsx      # Home screen
+│   └── (auth)/            # Authentication screens
+├── components/             # Reusable components
+│   ├── cart/              # Shopping cart components
+│   ├── store/             # Store-related components
+│   ├── shared/            # Common UI components
+│   └── videoplayer.tsx    # Video player component
+├── contexts/              # React Context providers
+│   ├── AuthContext.tsx    # Authentication state
+│   ├── LiveTvContext.tsx  # Live TV state
+│   ├── UserCartContext.tsx # Shopping cart state
+│   └── UserContext.tsx    # User profile state
+├── utils/                 # Utility functions
+│   ├── env.ts            # Environment configuration
+│   └── country.js        # Country data
+├── assets/               # Static assets
+│   ├── images/           # App images and logos
+│   └── fonts/            # Custom fonts
+└── web-preview/          # HTML preview for web
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 🔧 Configuration
 
-## Learn more
+### API Configuration
+The app connects to a backend API for:
+- User authentication
+- Product data
+- Live TV streams
+- Shopping cart management
+- Payment processing
 
-To learn more about developing your project with Expo, look at the following resources:
+### Environment Variables
+- `API_URL`: Backend API endpoint
+- `APP_NAME`: Application name
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🎯 Key Features Explained
 
-## Join the community
+### Live TV System
+- Real-time video streaming with HLS support
+- Live chat with user avatars and timestamps
+- Viewer count tracking
+- Fullscreen video player
+- App state management for background/foreground
 
-Join our community of developers creating universal apps.
+### E-commerce Store
+- Product catalog with categories
+- Real-time search functionality
+- Shopping cart with quantity management
+- Secure checkout process
+- Order history tracking
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### User Authentication
+- Email-based registration
+- Email verification system
+- Password reset functionality
+- Persistent login state
+- Profile management
+
+## 🚀 Deployment
+
+### Building for Production
+```bash
+# Build for Android
+eas build --platform android
+
+# Build for iOS
+eas build --platform ios
+```
+
+### Publishing Updates
+```bash
+# Publish to Expo
+expo publish
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is proprietary software for Loveworld Foundation School.
+
+## 📞 Support
+
+For technical support or questions about the LWFS app, please contact the development team.
+
+---
+
+**Built with ❤️ for Loveworld Foundation School**

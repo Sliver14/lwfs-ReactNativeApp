@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LWFS App Web Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #2563EB;
+      --color-accent: #4F46E5;
+      --color-neutral: #64748B;
+      --color-bg-light: #F9FAFB;
+      --color-bg-dark: #0F172A;
+      --color-text-light: #1E293B;
+      --color-text-dark: #F1F5F9;
+      --color-card-light: #FFFFFF;
+      --color-card-dark: #1E293B;
+      --radius-small: 6px;
+      --radius-medium: 10px;
+      --radius-large: 16px;
+      --radius-full: 9999px;
+      --shadow-light: 0px 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-dark: 0px 2px 8px rgba(255, 255, 255, 0.05);
+      --font-family: 'Inter', sans-serif;
+      --font-heading: 24px;
+      --font-subheading: 18px;
+      --font-body: 16px;
+      --font-caption: 14px;
+      --font-weight-regular: 400;
+      --font-weight-medium: 500;
+      --font-weight-semibold: 600;
+      --font-weight-bold: 700;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background: var(--color-bg-light);
+      color: var(--color-text-light);
+    }
+    body.dark {
+      background: var(--color-bg-dark);
+      color: var(--color-text-dark);
+    }
+    .container {
+      max-width: 512px;
+      margin: 0 auto;
+      padding-bottom: 120px;
+    }
+    .tabbar-bg {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 70px;
+      background: #fff;
+      z-index: 0;
+    }
+    body.dark .tabbar-bg {
+      background: var(--color-card-dark);
+    }
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #fff;
+      border-radius: 32px;
+      padding: 12px 16px;
+      max-width: 512px;
+      align-self: center;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      z-index: 1;
+    }
+    body.dark .tabbar {
+      background: var(--color-card-dark);
+    }
+    .tabbar-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border-radius: 80px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .tabbar-btn:hover {
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .tabbar-btn.active {
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .tabbar-btn.active .tabbar-label {
+      color: #3b82f6;
+      font-weight: 500;
+      opacity: 1;
+    }
+    .tabbar-btn .tabbar-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #9ca3af;
+      opacity: 0.7;
+      margin-top: 4px;
+      transition: color 0.2s ease, opacity 0.2s ease;
+    }
+    body.dark .tabbar-btn .tabbar-label {
+      color: #64748B;
+    }
+    .tabbar-btn svg {
+      margin-bottom: 4px;
+      stroke: #9ca3af;
+      transition: stroke 0.2s ease;
+    }
+    .tabbar-btn.active svg {
+      stroke: #3b82f6;
+    }
+    section {
+      background: var(--color-card-light);
+      border-radius: 24px;
+      margin: 24px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 24px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    body.dark section {
+      background: var(--color-card-dark);
+      color: var(--color-text-dark);
+    }
+    section.active {
+      display: block;
+      opacity: 1;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--color-text-light);
+    }
+    body.dark .section-title {
+      color: var(--color-text-dark);
+    }
+    .gradient-header {
+      background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+      color: #fff;
+      border-radius: 24px 24px 0 0;
+      padding: 32px 24px 24px 24px;
+      margin: -24px -24px 24px -24px;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.15);
+    }
+    .profile-pic {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: #fff2;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin-right: 16px;
+    }
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .quick-action {
+      background: var(--color-card-light);
+      border-radius: 16px;
+      width: 22%;
+      min-width: 80px;
+      padding: 16px 0 8px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; align-items: center;
+      border: 1px solid #f3f4f6;
+    }
+    body.dark .quick-action {
+      background: var(--color-card-dark);
+      border: 1px solid #1e293b;
+    }
+    .quick-action-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px;
+      color: #fff;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    }
+    .featured-card {
+      background: linear-gradient(90deg, #fb923c 0%, #ef4444 100%);
+      color: #fff;
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .featured-card .shop-btn {
+      background: #fff;
+      color: #ef4444;
+      border-radius: 999px;
+      padding: 8px 24px;
+      font-weight: 600;
+      margin-top: 12px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .live-video {
+      background: #000;
+      border-radius: 16px;
+      width: 100%;
+      height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .live-chat {
+      background: var(--color-card-light);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    body.dark .live-chat {
+      background: var(--color-card-dark);
+    }
+    .related-streams {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .related-stream {
+      background: var(--color-card-light);
+      border-radius: 16px;
+      width: 48%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 12px;
+      overflow: hidden;
+      border: 1px solid #f3f4f6;
+    }
+    body.dark .related-stream {
+      background: var(--color-card-dark);
+      border: 1px solid #1e293b;
+    }
+    .related-thumb {
+      height: 96px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 2rem;
+    }
+    .store-featured {
+      background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .store-featured .buy-btn {
+      background: #fff;
+      color: var(--color-primary);
+      border-radius: 999px;
+      padding: 8px 24px;
+      font-weight: 600;
+      margin-top: 12px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .product-grid, #searchProductGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      width: 100%;
+    }
+    .product-card {
+      background: var(--color-card-light);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      overflow: hidden;
+      border: 1px solid #f3f4f6;
+      display: flex; flex-direction: column;
+      min-width: 0;
+      transition: box-shadow 0.2s;
+    }
+    body.dark .product-card {
+      background: var(--color-card-dark);
+      border: 1px solid #1e293b;
+    }
+    .product-card:hover {
+      box-shadow: 0 4px 16px rgba(59,130,246,0.10);
+    }
+    .product-thumb {
+      background: #f3f4f6;
+      height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      color: #9ca3af;
+      font-size: 2rem;
+    }
+    body.dark .product-thumb {
+      background: #1e293b;
+      color: #64748B;
+    }
+    .product-info {
+      padding: 12px;
+      flex: 1;
+      display: flex; flex-direction: column;
+    }
+    .profile-section {
+      background: var(--color-card-light);
+      border-radius: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    body.dark .profile-section {
+      background: var(--color-card-dark);
+    }
+    .settings-section {
+      background: var(--color-card-light);
+      border-radius: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    body.dark .settings-section {
+      background: var(--color-card-dark);
+    }
+    .menu-section {
+      background: var(--color-card-light);
+      border-radius: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    body.dark .menu-section {
+      background: var(--color-card-dark);
+    }
+    .signout-btn {
+      background: #fef2f2;
+      color: #ef4444;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      font-weight: 600;
+      border: 1px solid #fee2e2;
+      margin-bottom: 24px;
+      cursor: pointer;
+    }
+    body.dark .signout-btn {
+      background: #1e293b;
+      color: #ef4444;
+      border: 1px solid #334155;
+    }
+    @media (max-width: 600px) {
+      .container, .tabbar {
+        max-width: 100vw;
+      }
+      .product-grid, #searchProductGrid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .event-carousel-section {
+      margin-top: 32px;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .event-carousel-scroll {
+      display: flex;
+      overflow-x: auto;
+      gap: 20px;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .event-card {
+      min-width: 320px;
+      max-width: 340px;
+      flex: 0 0 auto;
+      border-radius: 24px;
+      color: #fff;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+      position: relative;
+      scroll-snap-align: start;
+      margin-bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .event-card .event-date-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-left: auto;
+      background: rgba(255,255,255,0.10);
+    }
+    .event-card .event-date-badge .month {
+      font-size: 1rem;
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 2px;
+    }
+    .event-carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .event-carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d1d5db;
+      transition: background 0.2s, width 0.2s;
+      cursor: pointer;
+    }
+    .event-carousel-dot.active {
+      background: var(--color-primary);
+      width: 18px;
+    }
+    .chat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-message {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .chat-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(59,130,246,0.10);
+    }
+    .chat-content {
+      flex: 1;
+    }
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--color-text-light);
+    }
+    body.dark .chat-header {
+      color: var(--color-text-dark);
+    }
+    .chat-user {
+      color: var(--color-text-light);
+    }
+    body.dark .chat-user {
+      color: var(--color-text-dark);
+    }
+    .chat-time {
+      color: #9ca3af;
+      font-size: 0.92rem;
+      font-weight: 400;
+    }
+    .chat-text {
+      color: var(--color-text-light);
+      font-size: 1rem;
+      margin-top: 2px;
+    }
+    body.dark .chat-text {
+      color: var(--color-text-dark);
+    }
+    .live-label-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(239, 68, 68, 0.92);
+      color: #fff;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 12px;
+      z-index: 2;
+      box-shadow: 0 2px 8px rgba(239,68,68,0.10);
+      letter-spacing: 0.01em;
+      pointer-events: none;
+    }
+    .chat-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 18px;
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 6px 8px 6px 12px;
+    }
+    body.dark .chat-input-row {
+      background: #1e293b;
+    }
+    .chat-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1rem;
+      color: var(--color-text-light);
+      padding: 8px 0;
+    }
+    body.dark .chat-input {
+      color: var(--color-text-dark);
+    }
+    .chat-send-btn {
+      background: var(--color-primary);
+      border: none;
+      border-radius: 8px;
+      padding: 7px 12px 7px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chat-send-btn:active {
+      background: #2563eb;
+    }
+    .chat-send-btn svg {
+      display: block;
+      stroke: #fff;
+    }
+    /* StoreHeader styles */
+    .store-header-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .store-header-search {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 8px 12px;
+      gap: 8px;
+      cursor: pointer;
+    }
+    body.dark .store-header-search {
+      background: #1e293b;
+    }
+    .store-header-input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1rem;
+      color: var(--color-text-light);
+      flex: 1;
+    }
+    body.dark .store-header-input {
+      color: var(--color-text-dark);
+    }
+    .cart-btn {
+      background: var(--color-card-light);
+      border: none;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+    }
+    body.dark .cart-btn {
+      background: var(--color-card-dark);
+      color: var(--color-text-dark);
+    }
+    .badge {
+      background: #ef4444;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      margin-left: 2px;
+      min-width: 20px;
+      display: inline-block;
+      text-align: center;
+    }
+    /* StoreSearch styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.18);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .store-search-modal {
+      background: var(--color-card-light);
+      border-radius: 18px;
+      max-width: 480px;
+      width: 96vw;
+      margin: 40px auto 0 auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 18px 0 18px 0;
+    }
+    body.dark .store-search-modal {
+      background: var(--color-card-dark);
+    }
+    .store-search-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 18px 12px 18px;
+    }
+    .store-search-back {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .store-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: #f3f4f6;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: var(--color-text-light);
+      padding: 8px 12px;
+    }
+    body.dark .store-search-input {
+      background: #1e293b;
+      color: var(--color-text-dark);
+    }
+    .store-search-filter {
+      background: none;
+      border: none;
+      padding: 0 0 0 8px;
+      cursor: pointer;
+    }
+    /* Product Detail Modal styles */
+    .product-detail-modal {
+      background: var(--color-card-light);
+      border-radius: 18px;
+      max-width: 480px;
+      width: 96vw;
+      margin: 40px auto 0 auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 0 0 18px 0;
+    }
+    body.dark .product-detail-modal {
+      background: var(--color-card-dark);
+    }
+    .product-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 18px 0 18px;
+    }
+    .product-detail-back {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .product-detail-cart-btn {
+      background: var(--color-card-light);
+      border: none;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+    }
+    body.dark .product-detail-cart-btn {
+      background: var(--color-card-dark);
+      color: var(--color-text-dark);
+    }
+    .product-detail-content {
+      padding: 0 18px;
+    }
+    .product-detail-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-top: 18px;
+      margin-bottom: 18px;
+      background: #f3f4f6;
+    }
+    body.dark .product-detail-img {
+      background: #1e293b;
+    }
+    .product-detail-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--color-text-light);
+    }
+    body.dark .product-detail-title {
+      color: var(--color-text-dark);
+    }
+    .product-detail-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      margin-bottom: 10px;
+    }
+    .product-detail-desc {
+      color: #6b7280;
+      font-size: 1rem;
+      margin-bottom: 18px;
+    }
+    .product-detail-add-btn {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 12px 0;
+      width: 100%;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .product-detail-add-btn:active {
+      background: #2563eb;
+    }
+    /* Cart Modal styles */
+    .cart-modal {
+      background: var(--color-card-light);
+      border-radius: 18px;
+      max-width: 480px;
+      width: 96vw;
+      margin: 40px auto 0 auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 0 0 18px 0;
+    }
+    body.dark .cart-modal {
+      background: var(--color-card-dark);
+    }
+    .cart-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 18px 0 18px;
+    }
+    .cart-back {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .cart-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-text-light);
+    }
+    body.dark .cart-title {
+      color: var(--color-text-dark);
+    }
+    .cart-items-list {
+      padding: 18px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .cart-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+    body.dark .cart-item-row {
+      background: #1e293b;
+    }
+    .cart-item-img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f3f4f6;
+    }
+    body.dark .cart-item-img {
+      background: #334155;
+    }
+    .cart-item-info {
+      flex: 1;
+    }
+    .cart-item-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-light);
+      margin-bottom: 2px;
+    }
+    body.dark .cart-item-title {
+      color: var(--color-text-dark);
+    }
+    .cart-item-price {
+      color: var(--color-primary);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .cart-item-qty-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .cart-item-qty-btn {
+      background: #e5e7eb;
+      border: none;
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #374151;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    body.dark .cart-item-qty-btn {
+      background: #334155;
+      color: var(--color-text-dark);
+    }
+    .cart-item-qty-btn:active {
+      background: #d1d5db;
+    }
+    body.dark .cart-item-qty-btn:active {
+      background: #475569;
+    }
+    .cart-item-qty {
+      font-size: 1rem;
+      font-weight: 600;
+      min-width: 24px;
+      text-align: center;
+      color: var(--color-text-light);
+    }
+    body.dark .cart-item-qty {
+      color: var(--color-text-dark);
+    }
+    .cart-total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px 12px 18px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text-light);
+    }
+    body.dark .cart-total-row {
+      color: var(--color-text-dark);
+    }
+    .cart-total {
+      color: var(--color-primary);
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .cart-checkout-btn {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 12px 0;
+      width: 90%;
+      margin: 0 auto;
+      display: block;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .cart-checkout-btn:active {
+      background: #2563eb;
+    }
+    .fullscreen-page {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--color-card-light);
+      z-index: 200;
+    }
+    body.dark .fullscreen-page {
+      background: var(--color-card-dark);
+    }
+    .profile-modal {
+      background: var(--color-card-light);
+      border-radius: 0;
+      max-width: 480px;
+      width: 100vw;
+      height: 100vh;
+      margin: 0 auto;
+      box-shadow: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    body.dark .profile-modal {
+      background: var(--color-card-dark);
+    }
+    .profile-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 18px 0 18px;
+    }
+    .profile-modal-back {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    .profile-modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-text-light);
+    }
+    body.dark .profile-modal-title {
+      color: var(--color-text-dark);
+    }
+    .profile-modal-content {
+      padding: 18px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .order-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .order-item {
+      background: #f3f4f6;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      color: var(--color-text-light);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    body.dark .order-item {
+      background: #1e293b;
+      color: var(--color-text-dark);
+    }
+    .order-date {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    .change-password-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .profile-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+      margin-top: 6px;
+      background: var(--color-card-light);
+      color: var(--color-text-light);
+    }
+    body.dark .profile-input {
+      background: var(--color-card-dark);
+      color: var(--color-text-dark);
+      border: 1px solid #334155;
+    }
+    .profile-action-btn {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 12px 0;
+      width: 100%;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .profile-action-btn:active {
+      background: #2563eb;
+    }
+    .profile-info-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--color-text-light);
+    }
+    body.dark .profile-info-row {
+      color: var(--color-text-dark);
+    }
+    .store-carousel-section {
+      margin-bottom: 24px;
+      margin-top: 0;
+    }
+    .store-carousel {
+      display: flex;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+      position: relative;
+      width: 100%;
+      min-height: 140px;
+    }
+    .store-carousel-card {
+      min-width: 100%;
+      max-width: 100%;
+      border-radius: 16px;
+      color: #fff;
+      padding: 24px;
+      margin-right: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s;
+    }
+    .store-carousel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .store-carousel-desc {
+      color: #dbeafe;
+      margin-bottom: 8px;
+    }
+    .store-carousel-price {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .store-carousel-price .old-price {
+      font-size: 1rem;
+      color: #dbeafe;
+      text-decoration: line-through;
+      margin-left: 8px;
+    }
+    .store-carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .store-carousel-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d1d5db;
+      transition: background 0.2s, width 0.2s;
+      cursor: pointer;
+    }
+    .store-carousel-dot.active {
+      background: var(--color-primary);
+      width: 18px;
+    }
+    @media (max-width: 600px) {
+      .store-carousel-card {
+        padding: 16px;
+        font-size: 1rem;
+      }
+      .store-carousel-title {
+        font-size: 1.1rem;
+      }
+      .store-carousel-price {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Home Tab -->
+    <section id="home" class="active">
+      <div class="gradient-header">
+        <div style="display: flex; align-items: center;">
+          <div class="profile-pic">👤</div>
+          <div>
+            <div style="font-size: 1.25rem; font-weight: 700;">Alex Johnson</div>
+            <div style="color: #dbeafe;">Premium Member</div>
+          </div>
+          <div style="margin-left: auto;">
+            <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-action">
+          <div class="quick-action-icon" style="background: #ef4444;">📺</div>
+          <div class="tabbar-label">Watch Live</div>
+        </div>
+        <div class="quick-action">
+          <div class="quick-action-icon" style="background: #9333ea;">🔍</div>
+          <div class="tabbar-label">Online Class</div>
+        </div>
+        <div class="quick-action">
+          <div class="quick-action-icon" style="background: #facc15;">⭐</div>
+          <div class="tabbar-label">Testimonies</div>
+        </div>
+        <div class="quick-action">
+          <div class="quick-action-icon" style="background: #22c55e;">🛒</div>
+          <div class="tabbar-label">Store</div>
+        </div>
+      </div>
+      <div class="featured-card">
+        <div style="font-size: 1.25rem; font-weight: 700;">Summer Sale</div>
+        <div style="color: #fed7aa; margin-bottom: 8px;">Up to 50% off on selected items</div>
+        <a class="shop-btn" href="#store">Shop Now</a>
+      </div>
+      <!-- Event Carousel -->
+      <div class="event-carousel-section">
+        <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: #222;">Upcoming Events</div>
+        <div style="color: #6b7280; margin-bottom: 20px;">Swipe to explore more events</div>
+        <div class="event-carousel-scroll" id="eventCarouselScroll">
+          <!-- Event cards will be injected here by JS -->
+        </div>
+        <div class="event-carousel-dots" id="eventCarouselDots"></div>
+      </div>
+    </section>
+
+    <!-- LiveTV Tab -->
+    <section id="livetv">
+      <div class="section-title">Live TV</div>
+      <div class="live-video">
+        <div class="live-label-overlay">Live: Sunday Worship Service</div>
+        <span style="font-size: 2rem;">▶️</span>
+      </div>
+      <div class="live-chat">
+        <div style="font-weight: 600; color: #3b82f6; margin-bottom: 8px;">Live Chat</div>
+        <div class="chat-list">
+          <div class="chat-message">
+            <div class="chat-avatar" style="background: linear-gradient(90deg, #3b82f6 0%, #9333ea 100%);">AJ</div>
+            <div class="chat-content">
+              <div class="chat-header"><span class="chat-user">Alex Johnson</span> <span class="chat-time">10:12</span></div>
+              <div class="chat-text">This is amazing! 🙌</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-avatar" style="background: linear-gradient(90deg, #f59e42 0%, #ef4444 100%);">SM</div>
+            <div class="chat-content">
+              <div class="chat-header"><span class="chat-user">Sarah M.</span> <span class="chat-time">10:13</span></div>
+              <div class="chat-text">Loving the live stream! 👏</div>
+            </div>
+          </div>
+          <div class="chat-message">
+            <div class="chat-avatar" style="background: linear-gradient(90deg, #059669 0%, #0d9488 100%);">JD</div>
+            <div class="chat-content">
+              <div class="chat-header"><span class="chat-user">John Doe</span> <span class="chat-time">10:14</span></div>
+              <div class="chat-text">Greetings from Lagos! 🇳🇬</div>
+            </div>
+          </div>
+        </div>
+        <form class="chat-input-row" id="chatForm" autocomplete="off" onsubmit="return false;">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." maxlength="120" />
+          <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="Send">
+            <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+      </div>
+      <div class="section-title" style="margin-top: 24px;">Videos on demand</div>
+      <div class="related-streams">
+        <div class="related-stream">
+          <div class="related-thumb" style="background: #34D399;">▶️</div>
+          <div style="padding: 12px;">
+            <div style="font-weight: 600; color: #222;">Gaming Stream</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">🔴 856 viewers</div>
+          </div>
+        </div>
+        <div class="related-stream">
+          <div class="related-thumb" style="background: #A78BFA;">▶️</div>
+          <div style="padding: 12px;">
+            <div style="font-weight: 600; color: #222;">Music Live</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">🔴 1.2K viewers</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Store Tab -->
+    <section id="store">
+      <div class="section-title">Store</div>
+      <div class="store-header-row">
+        <div class="store-header-search" id="storeSearchBar">
+          <svg width="20" height="20" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="store-header-input" placeholder="Search products..." readonly />
+        </div>
+        <button class="cart-btn" id="openCart">
+          🛒 <span class="badge" id="cartCount">2</span>
+        </button>
+      </div>
+      <div class="store-carousel-section">
+        <div class="store-carousel" id="storeCarousel">
+          <div class="store-carousel-card" data-product="0" style="background: linear-gradient(90deg, #3B82F6 0%, #7C3AED 100%);">
+            <div class="store-carousel-title">Graduation Promo</div>
+            <div class="store-carousel-desc">Featured: Graduation Gown</div>
+            <div class="store-carousel-price">$59.99</div>
+            <a class="buy-btn" href="#" onclick="openProductDetail(0); return false;">See Details</a>
+          </div>
+          <div class="store-carousel-card" style="background: linear-gradient(90deg, #fb923c 0%, #ef4444 100%);">
+            <div class="store-carousel-title">Special Offer</div>
+            <div class="store-carousel-desc">Promo on select items</div>
+            <div class="store-carousel-price">From $9.99</div>
+            <a class="buy-btn" href="#store">Shop Now</a>
+          </div>
+          <div class="store-carousel-card" style="background: linear-gradient(90deg, #059669 0%, #0d9488 100%);">
+            <div class="store-carousel-title">New Collection</div>
+            <div class="store-carousel-desc">Check out the latest products!</div>
+            <div class="store-carousel-price">Featured from $14.99</div>
+            <a class="buy-btn" href="#store">Explore</a>
+          </div>
+        </div>
+        <div class="store-carousel-dots" id="storeCarouselDots"></div>
+      </div>
+      <div class="product-grid" id="productGrid">
+        <div class="product-card">
+          <div class="product-thumb">🧑‍🎓</div>
+          <div class="product-info">
+            <div style="font-weight: 600; color: #222;">Graduation Gown</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">Perfect for your big day!</div>
+            <div style="margin-top: 8px; font-weight: 700; color: #3b82f6;">$59.99</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-thumb">👕</div>
+          <div class="product-info">
+            <div style="font-weight: 600; color: #222;">LWFS T-Shirt</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">Comfy and stylish</div>
+            <div style="margin-top: 8px; font-weight: 700; color: #3b82f6;">$19.99</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-thumb">📚</div>
+          <div class="product-info">
+            <div style="font-weight: 600; color: #222;">Study Guide</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">Ace your exams!</div>
+            <div style="margin-top: 8px; font-weight: 700; color: #3b82f6;">$9.99</div>
+          </div>
+        </div>
+        <div class="product-card">
+          <div class="product-thumb">🎓</div>
+          <div class="product-info">
+            <div style="font-weight: 600; color: #222;">Cap & Tassel</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">Complete your look</div>
+            <div style="margin-top: 8px; font-weight: 700; color: #3b82f6;">$14.99</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Store Search Overlay -->
+    <div class="modal-overlay" id="storeSearchOverlay">
+      <div class="store-search-modal">
+        <div class="store-search-header">
+          <button class="store-search-back" id="closeStoreSearch">
+            <svg width="24" height="24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <input type="text" id="storeSearchInput" class="store-search-input" placeholder="Search products..." autofocus />
+          <button class="store-search-filter">
+            <svg width="24" height="24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </button>
+        </div>
+        <div class="product-grid" id="searchProductGrid">
+          <!-- Filtered product cards injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Detail Modal -->
+    <div class="fullscreen-page" id="productDetailPage">
+      <div class="product-detail-modal" style="max-width:100vw;width:100vw;height:100vh;border-radius:0;box-shadow:none;margin:0;padding-bottom:0;">
+        <div class="product-detail-header">
+          <button class="product-detail-back" id="closeProductDetail">
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <div class="product-detail-cart-btn" id="productDetailCartBtn">
+            🛒 <span class="badge" id="productDetailCartCount">2</span>
+          </div>
+        </div>
+        <div class="product-detail-content" id="productDetailContent">
+          <!-- Product detail injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="fullscreen-page" id="cartPage">
+      <div class="cart-modal" style="max-width:100vw;width:100vw;height:100vh;border-radius:0;box-shadow:none;margin:0;padding-bottom:0;">
+        <div class="cart-header">
+          <button class="cart-back" id="closeCart">
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span class="cart-title">Shopping Cart</span>
+        </div>
+        <div class="cart-items-list" id="cartItemsList">
+          <!-- Cart items injected by JS -->
+        </div>
+        <div class="cart-total-row">
+          <span>Total:</span>
+          <span class="cart-total" id="cartTotal">$0.00</span>
+        </div>
+        <button class="cart-checkout-btn">Proceed to Checkout</button>
+      </div>
+    </div>
+
+    <!-- Event Carousel -->
+    <div class="event-carousel">
+      <!-- Carousel cards and dots here -->
+    </div>
+
+    <!-- Profile Tab -->
+    <section id="profile">
+      <div class="section-title">Profile</div>
+      <div class="profile-section">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <div class="profile-pic">👤</div>
+          <div>
+            <div style="font-size: 1.25rem; font-weight: 700;">Alex Johnson</div>
+            <div style="color: #6b7280;">alex.johnson@email.com</div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div style="font-weight: 600; margin-bottom: 12px;">Quick Settings</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label style="display: flex; align-items: center; justify-content: space-between;">
+            <span>Notifications</span>
+            <input type="checkbox" checked style="accent-color: #3b82f6; width: 20px; height: 20px;" />
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between;">
+            <span>Dark Mode</span>
+            <input type="checkbox" style="accent-color: #3b82f6; width: 20px; height: 20px;" />
+          </label>
+        </div>
+      </div>
+      <div class="menu-section">
+        <div style="font-weight: 600; margin-bottom: 12px;">Menu</div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+            <span style="width: 24px; display: flex; justify-content: center;">🛍️</span>
+            <span style="flex: 1;">Order History</span>
+            <span style="color: #d1d5db;">&gt;</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+            <span style="width: 24px; display: flex; justify-content: center;">🔒</span>
+            <span style="flex: 1;">Change Password</span>
+            <span style="color: #d1d5db;">&gt;</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+            <span style="width: 24px; display: flex; justify-content: center;">👤</span>
+            <span style="flex: 1;">Personal Information</span>
+            <span style="color: #d1d5db;">&gt;</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+            <span style="width: 24px; display: flex; justify-content: center;">💬</span>
+            <span style="flex: 1;">Help & Support</span>
+            <span style="color: #d1d5db;">&gt;</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
+            <span style="width: 24px; display: flex; justify-content: center;">🛡️</span>
+            <span style="flex: 1;">Privacy Policy</span>
+            <span style="color: #d1d5db;">&gt;</span>
+          </div>
+        </div>
+      </div>
+      <div class="signout-btn">Sign Out</div>
+    </section>
+
+    <!-- Profile Related Fullscreen Pages -->
+    <div class="fullscreen-page" id="orderHistoryPage">
+      <div class="profile-modal">
+        <div class="profile-modal-header">
+          <button class="profile-modal-back" data-close-profile-page>
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span class="profile-modal-title">Order History</span>
+        </div>
+        <div class="profile-modal-content">
+          <div class="order-list">
+            <div class="order-item"><div>Order #1001</div><div>Graduation Gown</div><div class="order-date">2024-06-01</div></div>
+            <div class="order-item"><div>Order #1002</div><div>LWFS T-Shirt</div><div class="order-date">2024-05-15</div></div>
+            <div class="order-item"><div>Order #1003</div><div>Study Guide</div><div class="order-date">2024-04-20</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fullscreen-page" id="changePasswordPage">
+      <div class="profile-modal">
+        <div class="profile-modal-header">
+          <button class="profile-modal-back" data-close-profile-page>
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span class="profile-modal-title">Change Password</span>
+        </div>
+        <div class="profile-modal-content">
+          <form class="change-password-form" autocomplete="off" onsubmit="return false;">
+            <label>New Password<input type="password" class="profile-input" /></label>
+            <label>Confirm Password<input type="password" class="profile-input" /></label>
+            <button class="profile-action-btn">Change Password</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="fullscreen-page" id="personalInfoPage">
+      <div class="profile-modal">
+        <div class="profile-modal-header">
+          <button class="profile-modal-back" data-close-profile-page>
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span class="profile-modal-title">Personal Information</span>
+        </div>
+        <div class="profile-modal-content">
+          <div class="profile-info-row"><span>Name:</span> <span>Alex Johnson</span></div>
+          <div class="profile-info-row"><span>Email:</span> <span>alex.johnson@email.com</span></div>
+          <div class="profile-info-row"><span>Membership:</span> <span>Premium</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="fullscreen-page" id="helpSupportPage">
+      <div class="profile-modal">
+        <div class="profile-modal-header">
+          <button class="profile-modal-back" data-close-profile-page>
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span class="profile-modal-title">Help & Support</span>
+        </div>
+        <div class="profile-modal-content">
+          <div>For support, contact us at <a href="mailto:support@lwfs.com">support@lwfs.com</a> or call 0800-123-4567.</div>
+          <div style="margin-top:16px;">FAQ:<br/>Q: How do I reset my password?<br/>A: Use the Change Password option above.</div>
+        </div>
+      </div>
+    </div>
+    <div class="fullscreen-page" id="privacyPolicyPage">
+      <div class="profile-modal">
+        <div class="profile-modal-header">
+          <button class="profile-modal-back" data-close-profile-page>
+            <svg width="24" height="24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span class="profile-modal-title">Privacy Policy</span>
+        </div>
+        <div class="profile-modal-content">
+          <div style="font-size:0.98rem;line-height:1.6;">Your privacy is important to us. We do not share your data with third parties. For more details, visit our website.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TabBar (fixed at bottom) -->
+  <div class="tabbar-bg"></div>
+  <nav class="tabbar">
+    <button class="tabbar-btn active" data-tab="home" aria-label="Home">
+      <svg width="24" height="24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6" stroke="currentColor"/></svg>
+      <div class="tabbar-label">Home</div>
+    </button>
+    <button class="tabbar-btn" data-tab="livetv" aria-label="LiveTV">
+      <svg width="24" height="24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="3" stroke="currentColor"/><path d="M16 3.13V7M8 3.13V7" stroke="currentColor"/></svg>
+      <div class="tabbar-label">LiveTV</div>
+    </button>
+    <button class="tabbar-btn" data-tab="store" aria-label="Store">
+      <svg width="24" height="24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2l1.5 4.5M6 2l-1.5 4.5M6 2h12M18 2l1.5 4.5M18 2l-1.5 4.5M6 6.5h12M6 6.5l-1.5 4.5M6 6.5l1.5 4.5M18 6.5l1.5 4.5M18 6.5l-1.5 4.5M6 11h12M6 11l-1.5 4.5M6 11l1.5 4.5M18 11l1.5 4.5M18 11l-1.5 4.5M6 15.5h12" stroke="currentColor"/></svg>
+      <div class="tabbar-label">Store</div>
+    </button>
+    <button class="tabbar-btn" data-tab="profile" aria-label="Profile">
+      <svg width="24" height="24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4" stroke="currentColor"/><path d="M5.5 21a7.5 7.5 0 0113 0" stroke="currentColor"/></svg>
+      <div class="tabbar-label">Profile</div>
+    </button>
+  </nav>
+
+  <script>
+    // Tab switching logic
+    const tabButtons = document.querySelectorAll('.tabbar-btn');
+    const sections = document.querySelectorAll('section');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        // Set active tab button
+        tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+        // Show only the selected section
+        sections.forEach(sec => sec.classList.toggle('active', sec.id === tab));
+        // Scroll to top of content
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    // Add JS for opening/closing modals, updating cart count, switching product detail, etc.
+
+    // Event Carousel Data and Logic
+    const eventData = [
+      {
+        id: '1',
+        title: 'Praise Night 23',
+        date: '25',
+        month: 'MAY',
+        minister: 'With Pastor Chris Oyakhilome',
+        platform: 'Streaming on LWFS TV',
+        time: '2PM GMT+1',
+        gradient: 'linear-gradient(90deg, #9333ea 0%, #e11d48 100%)',
+      },
+      {
+        id: '2',
+        title: 'June Communion Service',
+        date: '1',
+        month: 'JUNE',
+        minister: 'With Pastor Chris Oyakhilome',
+        platform: 'Streaming on LWFS TV',
+        time: '3PM GMT+1',
+        gradient: 'linear-gradient(90deg, #2563eb 0%, #06b6d4 100%)',
+      },
+      {
+        id: '3',
+        title: 'Healing Service',
+        date: '15',
+        month: 'JUNE',
+        minister: 'With Pastor Chris Oyakhilome',
+        platform: 'Streaming on LWFS TV',
+        time: '4PM GMT+1',
+        gradient: 'linear-gradient(90deg, #059669 0%, #0d9488 100%)',
+      },
+      {
+        id: '4',
+        title: 'Prayer Meeting',
+        date: '30',
+        month: 'JUNE',
+        minister: 'With Pastor Chris Oyakhilome',
+        platform: 'Streaming on LWFS TV',
+        time: '5PM GMT+1',
+        gradient: 'linear-gradient(90deg, #dc2626 0%, #ea580c 100%)',
+      },
+    ];
+
+    const eventCarouselScroll = document.getElementById('eventCarouselScroll');
+    const eventCarouselDots = document.getElementById('eventCarouselDots');
+    let eventActiveIndex = 0;
+
+    function renderEventCarousel() {
+      eventCarouselScroll.innerHTML = '';
+      eventData.forEach((event, idx) => {
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        card.style.background = event.gradient;
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;">${event.title}</div>
+              <div style="font-size: 1rem; color: #f3f4f6;">${event.time}</div>
+            </div>
+            <div class="event-date-badge">
+              <div>${event.date}</div>
+              <div class="month">${event.month}</div>
+            </div>
+          </div>
+          <div style="font-size: 1rem; font-weight: 500; color: #f3f4f6; margin-bottom: 8px;">${event.minister}</div>
+          <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 8px 0; text-align: center; font-size: 0.95rem; color: #fff;">📺 ${event.platform}</div>
+        `;
+        eventCarouselScroll.appendChild(card);
+      });
+      renderEventDots();
+    }
+
+    function renderEventDots() {
+      eventCarouselDots.innerHTML = '';
+      eventData.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = 'event-carousel-dot' + (idx === eventActiveIndex ? ' active' : '');
+        dot.addEventListener('click', () => scrollToEvent(idx));
+        eventCarouselDots.appendChild(dot);
+      });
+    }
+
+    function scrollToEvent(idx) {
+      const scroll = eventCarouselScroll;
+      const card = scroll.children[idx];
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+        eventActiveIndex = idx;
+        renderEventDots();
+      }
+    }
+
+    eventCarouselScroll?.addEventListener('scroll', () => {
+      const scrollLeft = eventCarouselScroll.scrollLeft;
+      const cardWidth = eventCarouselScroll.children[0]?.offsetWidth || 1;
+      const idx = Math.round(scrollLeft / (cardWidth + 20));
+      if (eventActiveIndex !== idx) {
+        eventActiveIndex = idx;
+        renderEventDots();
+      }
+    });
+
+    renderEventCarousel();
+
+    // Live Chat Send (static, just clears input for now)
+    document.getElementById('chatForm')?.addEventListener('submit', function() {
+      const input = document.getElementById('chatInput');
+      if (input && input.value.trim()) {
+        // In a real app, you'd append the message to the chat-list here
+        input.value = '';
+      }
+    });
+
+    // --- Store/Product/Cart Demo Data and Logic ---
+    const products = [
+      {
+        id: 0,
+        name: 'Graduation Gown',
+        desc: 'Perfect for your big day! High quality, comfortable, and stylish.',
+        price: 59.99,
+        oldPrice: 99.99,
+        emoji: '🧑‍🎓',
+        img: '',
+      },
+      {
+        id: 1,
+        name: 'LWFS T-Shirt',
+        desc: 'Comfy and stylish. Show your LWFS pride everywhere you go.',
+        price: 19.99,
+        oldPrice: null,
+        emoji: '👕',
+        img: '',
+      },
+      {
+        id: 2,
+        name: 'Study Guide',
+        desc: 'Ace your exams! The ultimate study companion.',
+        price: 9.99,
+        oldPrice: null,
+        emoji: '📚',
+        img: '',
+      },
+      {
+        id: 3,
+        name: 'Cap & Tassel',
+        desc: 'Complete your look for graduation day.',
+        price: 14.99,
+        oldPrice: null,
+        emoji: '🎓',
+        img: '',
+      },
+    ];
+    let cart = [
+      { productId: 0, qty: 1 },
+      { productId: 1, qty: 2 },
+    ];
+
+    function getProductById(id) {
+      return products.find(p => p.id === id);
+    }
+    function getCartCount() {
+      return cart.reduce((sum, item) => sum + item.qty, 0);
+    }
+    function getCartTotal() {
+      return cart.reduce((sum, item) => sum + getProductById(item.productId).price * item.qty, 0);
+    }
+    function renderProductGrid(gridId, filter = '') {
+      const grid = document.getElementById(gridId);
+      if (!grid) return;
+      grid.innerHTML = '';
+      products.filter(p => p.name.toLowerCase().includes(filter.toLowerCase())).forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.tabIndex = 0;
+        card.innerHTML = `
+          <div class="product-thumb">${product.emoji}</div>
+          <div class="product-info">
+            <div style="font-weight: 600; color: #222;">${product.name}</div>
+            <div style="color: #6b7280; font-size: 0.95rem;">${product.desc.split('.')[0]}</div>
+            <div style="margin-top: 8px; font-weight: 700; color: #3b82f6;">$${product.price.toFixed(2)}</div>
+          </div>
+        `;
+        card.onclick = () => openProductDetail(product.id);
+        grid.appendChild(card);
+      });
+    }
+    function renderCart() {
+      const list = document.getElementById('cartItemsList');
+      const total = document.getElementById('cartTotal');
+      const badge = document.getElementById('cartCount');
+      const badge2 = document.getElementById('productDetailCartCount');
+      if (!list || !total) return;
+      list.innerHTML = '';
+      if (cart.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:32px 0;">Your cart is empty</div>';
+      } else {
+        cart.forEach(item => {
+          const product = getProductById(item.productId);
+          const row = document.createElement('div');
+          row.className = 'cart-item-row';
+          row.innerHTML = `
+            <div class="cart-item-img">${product.emoji}</div>
+            <div class="cart-item-info">
+              <div class="cart-item-title">${product.name}</div>
+              <div class="cart-item-price">$${product.price.toFixed(2)}</div>
+              <div class="cart-item-qty-row">
+                <button class="cart-item-qty-btn" aria-label="Decrease">-</button>
+                <span class="cart-item-qty">${item.qty}</span>
+                <button class="cart-item-qty-btn" aria-label="Increase">+</button>
+              </div>
+            </div>
+          `;
+          // Quantity controls
+          row.querySelectorAll('.cart-item-qty-btn')[0].onclick = () => { if (item.qty > 1) { item.qty--; } else { cart = cart.filter(ci => ci !== item); } renderCart(); };
+          row.querySelectorAll('.cart-item-qty-btn')[1].onclick = () => { item.qty++; renderCart(); };
+          list.appendChild(row);
+        });
+      }
+      total.textContent = `$${getCartTotal().toFixed(2)}`;
+      if (badge) badge.textContent = getCartCount();
+      if (badge2) badge2.textContent = getCartCount();
+    }
+    function openProductDetail(id) {
+      const page = document.getElementById('productDetailPage');
+      const content = document.getElementById('productDetailContent');
+      const tabbar = document.querySelector('.tabbar');
+      if (!page || !content) return;
+      const product = getProductById(id);
+      content.innerHTML = `
+        <div class="product-detail-img" style="display:flex;align-items:center;justify-content:center;font-size:3rem;">${product.emoji}</div>
+        <div class="product-detail-title">${product.name}</div>
+        <div class="product-detail-price">$${product.price.toFixed(2)}${product.oldPrice ? ` <span style='color:#dbeafe;text-decoration:line-through;font-size:1rem;margin-left:8px;'>$${product.oldPrice.toFixed(2)}</span>` : ''}</div>
+        <div class="product-detail-desc">${product.desc}</div>
+        <button class="product-detail-add-btn" id="addToCartBtn">Add to Cart</button>
+      `;
+      page.style.display = 'flex';
+      if (tabbar) tabbar.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+      document.getElementById('addToCartBtn').onclick = function() {
+        let cartItem = cart.find(ci => ci.productId === id);
+        if (cartItem) { cartItem.qty++; } else { cart.push({ productId: id, qty: 1 }); }
+        renderCart();
+      };
+    }
+    function closeProductDetail() {
+      const page = document.getElementById('productDetailPage');
+      const tabbar = document.querySelector('.tabbar');
+      if (page) { page.style.display = 'none'; document.body.style.overflow = ''; }
+      if (tabbar) tabbar.style.display = '';
+    }
+    function openCart() {
+      const page = document.getElementById('cartPage');
+      const tabbar = document.querySelector('.tabbar');
+      if (page) { page.style.display = 'flex'; document.body.style.overflow = 'hidden'; renderCart(); }
+      if (tabbar) tabbar.style.display = 'none';
+    }
+    function closeCart() {
+      const page = document.getElementById('cartPage');
+      const tabbar = document.querySelector('.tabbar');
+      if (page) { page.style.display = 'none'; document.body.style.overflow = ''; }
+      if (tabbar) tabbar.style.display = '';
+    }
+    function openStoreSearch() {
+      const modal = document.getElementById('storeSearchOverlay');
+      if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; renderProductGrid('searchProductGrid'); }
+      document.getElementById('storeSearchInput').value = '';
+    }
+    function closeStoreSearch() {
+      const modal = document.getElementById('storeSearchOverlay');
+      if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+    }
+    // Event listeners
+    renderProductGrid('productGrid');
+    document.getElementById('openCart').onclick = openCart;
+    document.getElementById('productDetailCartBtn').onclick = openCart;
+    document.getElementById('closeCart').onclick = closeCart;
+    document.getElementById('closeProductDetail').onclick = closeProductDetail;
+    document.getElementById('storeSearchBar').onclick = openStoreSearch;
+    document.getElementById('closeStoreSearch').onclick = closeStoreSearch;
+    document.getElementById('storeSearchInput').oninput = function(e) {
+      renderProductGrid('searchProductGrid', e.target.value);
+    };
+    // Clicking a product in search opens detail
+    setTimeout(() => {
+      Array.from(document.querySelectorAll('#searchProductGrid .product-card')).forEach((card, idx) => {
+        card.onclick = () => openProductDetail(products[idx].id);
+      });
+    }, 100);
+    // Close overlays on Escape
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeProductDetail();
+        closeCart();
+        closeStoreSearch();
+      }
+    });
+
+    // Profile navigation logic
+    const profileMenuMap = {
+      0: 'orderHistoryPage',
+      1: 'changePasswordPage',
+      2: 'personalInfoPage',
+      3: 'helpSupportPage',
+      4: 'privacyPolicyPage',
+    };
+    document.querySelectorAll('.menu-section > div').forEach((item, idx) => {
+      item.addEventListener('click', function() {
+        const pageId = profileMenuMap[idx];
+        if (pageId) {
+          document.getElementById(pageId).style.display = 'flex';
+          const tabbar = document.querySelector('.tabbar');
+          if (tabbar) tabbar.style.display = 'none';
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+    document.querySelectorAll('[data-close-profile-page]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.fullscreen-page').style.display = 'none';
+        const tabbar = document.querySelector('.tabbar');
+        if (tabbar) tabbar.style.display = '';
+        document.body.style.overflow = '';
+      });
+    });
+
+    // Dark mode toggle
+    const darkModeSwitch = document.querySelector('.settings-section input[type="checkbox"]:not(:checked) ~ input[type="checkbox"]') ||
+      Array.from(document.querySelectorAll('.settings-section label')).find(l => l.textContent.includes('Dark Mode'))?.querySelector('input[type="checkbox"]');
+    const root = document.documentElement;
+    function setDarkMode(on) {
+      if (on) {
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+    }
+    document.querySelectorAll('.settings-section label').forEach(label => {
+      if (label.textContent.includes('Dark Mode')) {
+        const input = label.querySelector('input[type="checkbox"]');
+        if (input) {
+          input.addEventListener('change', function() {
+            setDarkMode(this.checked);
+          });
+        }
+      }
+    });
+
+    // Store Carousel Logic
+    const storeCarousel = document.getElementById('storeCarousel');
+    const storeCarouselDots = document.getElementById('storeCarouselDots');
+    const storeCards = storeCarousel ? Array.from(storeCarousel.children) : [];
+    let storeCarouselIndex = 0;
+    function renderStoreCarouselDots() {
+      if (!storeCarouselDots) return;
+      storeCarouselDots.innerHTML = '';
+      storeCards.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = 'store-carousel-dot' + (idx === storeCarouselIndex ? ' active' : '');
+        dot.addEventListener('click', () => scrollToStoreCard(idx));
+        storeCarouselDots.appendChild(dot);
+      });
+    }
+    function scrollToStoreCard(idx) {
+      if (!storeCarousel) return;
+      storeCarouselIndex = idx;
+      storeCarousel.scrollTo({ left: idx * storeCarousel.offsetWidth, behavior: 'smooth' });
+      renderStoreCarouselDots();
+    }
+    function autoScrollStoreCarousel() {
+      if (!storeCarousel) return;
+      storeCarouselIndex = (storeCarouselIndex + 1) % storeCards.length;
+      scrollToStoreCard(storeCarouselIndex);
+    }
+    if (storeCarousel && storeCards.length > 1) {
+      renderStoreCarouselDots();
+      setInterval(autoScrollStoreCarousel, 3000);
+      storeCarousel.addEventListener('scroll', () => {
+        const idx = Math.round(storeCarousel.scrollLeft / storeCarousel.offsetWidth);
+        if (storeCarouselIndex !== idx) {
+          storeCarouselIndex = idx;
+          renderStoreCarouselDots();
+        }
+      });
+    }
+  </script>
+</body>
+</html> 

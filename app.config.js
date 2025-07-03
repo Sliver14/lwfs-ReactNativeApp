@@ -1,57 +1,64 @@
 // app.config.js
 require('dotenv').config();
 
-export default {
+module.exports = {
     expo: {
         name: "Loveworld Foundation School",
-        slug: "Loveworld-Foundation-School",
+        slug: "lwfs_app",
         version: "1.0.0",
-        orientation: "portrait",
-        icon: "./assets/images/logo.png",
-        scheme: "lwfs_app",
-        deepLinking: true,
-        userInterfaceStyle: "automatic",
-        newArchEnabled: true,
+        orientation: "default",
+        icon: "./assets/icon.png",
+        userInterfaceStyle: "light",
+        splash: {
+            image: "./assets/images/welcome/Logo-shadow.png",
+            resizeMode: "contain",
+            backgroundColor: "#ffffff"
+        },
+        assetBundlePatterns: [
+            "**/*"
+        ],
         ios: {
-            supportsTablet: true
+            supportsTablet: true,
+            bundleIdentifier: "com.lwfs.app",
+            infoPlist: {
+                NSCameraUsageDescription: "This app uses the camera to capture photos for user profile and content sharing.",
+                NSPhotoLibraryUsageDescription: "This app accesses your photos to let you share them with your friends.",
+                NSMicrophoneUsageDescription: "This app uses the microphone to record audio for video playback."
+            }
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: "./assets/images/icon.png",
+                foregroundImage: "./assets/icon.png",
                 backgroundColor: "#ffffff"
             },
-            edgeToEdgeEnabled: true,
-            package: "com.sliver14.lwfs_app"
+            package: "com.lwfs.app",
+            permissions: [
+                "CAMERA",
+                "READ_EXTERNAL_STORAGE",
+                "WRITE_EXTERNAL_STORAGE",
+                "RECORD_AUDIO"
+            ]
         },
         web: {
-            bundler: "metro",
-            output: "static",
-            favicon: "./assets/images/icon.png"
+            favicon: "./assets/icon.png"
         },
         plugins: [
-            "expo-router",
-            "expo-web-browser",
-            "expo-video",
+            "expo-av",
+            "expo-screen-orientation",
             [
-                "expo-splash-screen",
+                "react-native-video",
                 {
-                    image: "./assets/images/splash-icon.png",
-                    imageWidth: 200,
-                    resizeMode: "contain",
-                    backgroundColor: "#ffffff"
+                    "enableMergePathsAndroidX": true,
+                    "androidXVersion": "1.0.0"
                 }
             ],
-            "react-native-video",
-            "expo-secure-store"
+            "react-native-orientation-locker"
         ],
-        experiments: {
-            typedRoutes: true
-        },
         extra: {
             API_URL: process.env.API_URL,
             APP_NAME: process.env.APP_NAME,
             eas: {
-                projectId: "d8b0d498-7935-4f85-ae24-7deac0b03abf"
+                projectId: "your-project-id"
             }
         }
     }

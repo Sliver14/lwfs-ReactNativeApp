@@ -1,7 +1,7 @@
 import { API_URL } from '@/utils/env';
 import axios from "axios";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import * as SecureStore from 'expo-secure-store';
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 interface UserDetails {
     id: string;
@@ -34,16 +34,37 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 return;
             }
 
+            // Log the API URL and token for debugging
+            console.log('API URL:', API_URL);
+            console.log('Token:', token);
+
             const response = await axios.get(`${API_URL}/auth/tokenverify`, {
-                headers: { Authorization: `Bearer ${token}` },
-                withCredentials: true,
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
             });
-            setUserId(response.data.user.id);
-            setUserDetails(response.data.user);
+
+            console.log('Token verify response:', response.data);
+
+            if (response.data.user) {
+                setUserId(response.data.user.id);
+                setUserDetails(response.data.user);
+            } else {
+                console.warn('No user data in response:', response.data);
+                setUserId(null);
+                setUserDetails(null);
+            }
         } catch (error) {
             console.error("Error fetching user ID:", error);
+            if (axios.isAxiosError(error)) {
+                console.error("Response data:", error.response?.data);
+                console.error("Response status:", error.response?.status);
+            }
             setUserId(null);
             setUserDetails(null);
+            // Optionally clear the token if it's invalid
+            await SecureStore.deleteItemAsync('userToken');
         }
     }, []);
 

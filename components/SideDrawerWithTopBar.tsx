@@ -1,18 +1,19 @@
-import React, {useEffect, useContext, useRef, useState} from 'react';
+import { useAuth } from "@/contexts/AuthContext";
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from "expo-router";
+import * as WebBrowser from 'expo-web-browser';
+import React, { useRef, useState } from 'react';
 import {
-    View,
-    Text,
-    TouchableOpacity,
-    Image,
+    Alert,
     Animated,
     Dimensions,
+    Image,
     Pressable,
-    Platform,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import { useUser } from "../contexts/UserContext"
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import {useRouter} from "expo-router";
-import * as SecureStore from 'expo-secure-store';
+import { useUser } from "../contexts/UserContext";
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -21,6 +22,8 @@ const SidebarWithTopMenu = ({ children }: { children: React.ReactNode }) => {
     const slideAnim = useRef(new Animated.Value(-screenWidth * 0.75)).current;
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const { userDetails } = useUser();
+    const { logout } = useAuth();
+    const router = useRouter();
     const toggleSidebar = () => {
         if (isSidebarVisible) {
             Animated.parallel([
@@ -52,13 +55,21 @@ const SidebarWithTopMenu = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
+    const handleOnlineClass = async () => {
+        try {
+            await WebBrowser.openBrowserAsync('https://online-school-olive.vercel.app/');
+        } catch (error) {
+            console.error('Error opening online class:', error);
+        }
+    };
+
     const menuItems = [
-        { label: 'Home', icon: 'home-outline', link: '/'  },
-        { label: 'Online Class', icon: 'school-outline', link: '/onlineclass/index'  },
-        { label: 'Testimony', icon: 'chatbox-ellipses-outline', link: '/testimony/testimony' },
-        { label: 'LiveTV', icon: 'tv-outline', link: '/livetv' },
-        { label: 'About us', icon: 'information-circle-outline', link: '/home' },
-        { label: 'Settings', icon: 'settings-outline', link: '/profile' },
+        { label: 'Home', icon: 'home-outline', link: '/' as const },
+        { label: 'Online Class', icon: 'school-outline', action: handleOnlineClass },
+        { label: 'Testimony', icon: 'chatbox-ellipses-outline', link: '/testimony/testimony' as const },
+        { label: 'LiveTV', icon: 'tv-outline', link: '/livetv' as const },
+        { label: 'About us', icon: 'information-circle-outline', link: '/home' as const },
+        { label: 'Settings', icon: 'settings-outline', link: '/profile' as const },
     ];
 
     const CustomTouchable = ({ onPress, children }: any) => (
@@ -74,10 +85,6 @@ const SidebarWithTopMenu = ({ children }: { children: React.ReactNode }) => {
         </Pressable>
     );
 
-    const router = useRouter();
-
-
-
     return (
         <View className="flex-1 relative">
             {/* Top Bar — now rendered after but appears underneath due to z-index */}
@@ -90,7 +97,6 @@ const SidebarWithTopMenu = ({ children }: { children: React.ReactNode }) => {
                     className="w-12 h-12 rounded-full"
                 />
             </View>
-
 
             {/* Page Content */}
             <View className="flex-1">{children}</View>
@@ -142,7 +148,11 @@ const SidebarWithTopMenu = ({ children }: { children: React.ReactNode }) => {
                 <View className="gap-2">
                     {menuItems.map((item, idx) => (
                         <CustomTouchable key={idx} onPress={() => {
-                            router.push(item.link);
+                            if (item.action) {
+                                item.action();
+                            } else if (item.link) {
+                                router.push(item.link as any);
+                            }
                             toggleSidebar();
                         }}>
                             <Ionicons name={item.icon as any} size={20} color="#000" />
@@ -152,13 +162,13 @@ const SidebarWithTopMenu = ({ children }: { children: React.ReactNode }) => {
 
                     <CustomTouchable
                         onPress={async () => {
-                            // Remove token from storage
-                            await SecureStore.deleteItemAsync('userToken');
-
-                            // Optionally: reset auth context if you have one
-
-                            // Redirect to welcome/login screen
-                            router.replace('/welcome');
+                            try {
+                                await logout();
+                                router.replace('/welcome');
+                            } catch (error) {
+                                console.error('Error during logout:', error);
+                                Alert.alert('Error', 'Failed to sign out. Please try again.');
+                            }
                         }}
                     >
                         <MaterialIcons name="logout" size={20} color="#000" />

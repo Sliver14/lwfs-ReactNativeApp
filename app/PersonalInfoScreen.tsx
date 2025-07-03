@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    Image,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
-    Modal,
-    ActivityIndicator,
-    Animated,
-    StatusBar,
-    Dimensions,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
-import axios from 'axios';
-import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '@/contexts/UserContext';
+import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Animated,
+    Dimensions,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -141,8 +141,8 @@ export default function PersonalInfoScreen() {
     };
 
     return (
-        <>
-            <StatusBar barStyle="light-content" backgroundColor="#6366f1" />
+        <SafeAreaView className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
+            <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
             <ScrollView
                 className="flex-1 bg-gray-50"
                 showsVerticalScrollIndicator={false}
@@ -309,6 +309,6 @@ export default function PersonalInfoScreen() {
 
                 <View className="h-8" />
             </ScrollView>
-        </>
+        </SafeAreaView>
     );
 }
