@@ -6,8 +6,8 @@ module.exports = {
         name: "Loveworld Foundation School",
         slug: "lwfs_app",
         version: "1.0.0",
-        orientation: "default",
-        icon: "./assets/icon.png",
+        orientation: "portrait",
+        icon: "./assets/images/icon.png",
         userInterfaceStyle: "light",
         splash: {
             image: "./assets/images/welcome/Logo-shadow.png",
@@ -28,7 +28,7 @@ module.exports = {
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: "./assets/icon.png",
+                foregroundImage: "./assets/images/icon.png",
                 backgroundColor: "#ffffff"
             },
             package: "com.lwfs.app",
@@ -40,19 +40,11 @@ module.exports = {
             ]
         },
         web: {
-            favicon: "./assets/icon.png"
+            favicon: "./assets/images/icon.png"
         },
         plugins: [
             "expo-av",
-            "expo-screen-orientation",
-            [
-                "react-native-video",
-                {
-                    "enableMergePathsAndroidX": true,
-                    "androidXVersion": "1.0.0"
-                }
-            ],
-            "react-native-orientation-locker"
+            "expo-screen-orientation"
         ],
         extra: {
             API_URL: process.env.API_URL,
