@@ -1,22 +1,23 @@
 import { CartScreen } from '@/components/cart/CartScreen';
 import { ProductDetail } from '@/components/products/ProductDetail';
 import { ProductCard } from '@/components/store/ProductCard';
-import { StoreSearch } from '@/components/store/StoreSearch';
 import { useUserCart } from '@/contexts/UserCartContext';
 import { useUser } from '@/contexts/UserContext';
+import { Product } from '@/types'; // Import Product type from centralized types
 import { API_URL } from '@/utils/env';
 import { Feather } from '@expo/vector-icons';
 import axios from 'axios';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
 import {
   Animated,
   Dimensions,
+  FlatList,
   SafeAreaView,
   ScrollView,
   StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
@@ -25,17 +26,6 @@ import {
 
 // Get screen width for carousel
 const { width: screenWidth } = Dimensions.get('window');
-
-// Define Product type locally since types file is missing
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image?: string;
-  imageUrl?: string;
-}
 
 type ViewType = 'store' | 'search' | 'productDetail' | 'cart';
 
@@ -57,31 +47,33 @@ const EnhancedStoreHeader: React.FC<{
   showSearch?: boolean;
 }> = ({ cartCount, onSearchPress, onCartPress, searchQuery, onSearchChange, showSearch = false }) => {
   return (
-    <View className="flex-row items-center space-x-2 mb-4">
+    <View style={styles.headerContainer}>
       <View className="flex-1 relative">
         <Feather
           name="search"
           size={20}
-          color="#657786"
-          style={{ position: 'absolute', left: 12, top: '50%', transform: [{ translateY: -10 }], zIndex: 1 }}
+          color="#666666"
+          style={{ position: 'absolute', left: 20, top: '50%', transform: [{ translateY: -10 }], zIndex: 1 }}
         />
         <TextInput
           value={searchQuery}
           onChangeText={onSearchChange}
           placeholder="Search products..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl text-sm text-gray-800"
+          className="w-full pr-4 py-3 rounded-xl text-sm text-gray-800"
           onFocus={onSearchPress}
-          placeholderTextColor="#657786"
+          placeholderTextColor="#666666"
           editable={true}
           style={{
-            backgroundColor: '#F5F7FA',
+            backgroundColor: '#fff',
             borderRadius: 20,
-            fontWeight: '400'
+            fontWeight: '400',
+            marginHorizontal: 0,
+            paddingLeft: 50
           }}
         />
       </View>
-      <TouchableOpacity className="relative p-2" onPress={onCartPress}>
-        <Feather name="shopping-cart" size={24} color="#657786" />
+      <TouchableOpacity className="relative p-2 mr-3" onPress={onCartPress}>
+        <Feather name="shopping-cart" size={24} color="#666666" />
         {cartCount > 0 && (
           <View className="absolute -top-1 -right-1 bg-red-500 rounded-full w-5 h-5 items-center justify-center">
             <Text className="text-white text-xs font-bold" style={{ fontWeight: '700' }}>{cartCount}</Text>
@@ -118,10 +110,10 @@ const CategoryPills: React.FC<{
             style={{
               borderRadius: 20,
               backgroundColor: activeCategory === category || (index === 0 && activeCategory === 'All') 
-                ? '#4A90E2' 
-                : '#F5F7FA',
+                ? '#0c0c5f' 
+                : '#f8f9fa',
               borderWidth: activeCategory === category || (index === 0 && activeCategory === 'All') ? 0 : 1,
-              borderColor: '#E1E8ED'
+              borderColor: '#f8f9fa'
             }}
           >
             <Text 
@@ -148,264 +140,220 @@ const AutoScrollingPromotionFlyer: React.FC<{
   onBuyNow: (promotion: any) => void;
 }> = ({ onBuyNow }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const scrollViewRef = React.useRef<ScrollView>(null);
-  const fadeAnim = React.useRef(new Animated.Value(1)).current;
+  const slideAnim = React.useRef(new Animated.Value(0)).current;
 
   const promotions = [
     {
       id: 1,
       title: 'Graduation Season',
-      subtitle: 'Graduation Gown - Special Offer',
-      price: '$59.99',
-      originalPrice: '$99.99',
+      subtitle: 'Doctorate Graduation Gown - Special Offer',
+      price: '45.7 Espees',
+      originalPrice: '55.5 Espees',
       buttonText: 'Buy Now',
-      colors: ['#4A90E2', '#7B68EE'] as [string, string],
-      productName: 'Graduation Gown'
+      colors: ['#0c0c5f', '#3d3d8f'] as [string, string],
+      productName: 'Doctorate Graduation Gown'
     },
     {
       id: 2,
-      title: 'Summer Collection',
-      subtitle: 'New Arrivals - Up to 40% Off',
-      price: 'From $29.99',
+      title: 'Student Combo',
+      subtitle: 'New Arrivals - Up to 20% Off',
+      price: 'From 29.99 Espees',
       originalPrice: '',
       buttonText: 'Shop Now',
-      colors: ['#FF8C42', '#FFD93D'] as [string, string],
-      productName: 'Summer Collection'
-    },
-    {
-      id: 3,
-      title: 'Back to School',
-      subtitle: 'School Supplies & Uniforms',
-      price: 'From $19.99',
-      originalPrice: '',
-      buttonText: 'Explore',
-      colors: ['#4CAF50', '#8BC34A'] as [string, string],
-      productName: 'School Supplies'
-    },
-    {
-      id: 4,
-      title: 'Holiday Special',
-      subtitle: 'Festive Collection - Limited Time',
-      price: 'From $39.99',
-      originalPrice: '$79.99',
-      buttonText: 'Get Offer',
-      colors: ['#9C27B0', '#7B68EE'] as [string, string],
-      productName: 'Holiday Collection'
+      colors: ['#ffe800', '#fea601'] as [string, string],
+      productName: 'Student Combo'
     }
+    // ,{
+    //   id: 3,
+    //   title: 'Back to School',
+    //   subtitle: 'School Supplies & Uniforms',
+    //   price: 'From 19.99 Espees',
+    //   originalPrice: '',
+    //   buttonText: 'Explore',
+    //   colors: ['#4CAF50', '#8BC34A'] as [string, string],
+    //   productName: 'School Supplies'
+    // },
+    // {
+    //   id: 4,
+    //   title: 'Holiday Special',
+    //   subtitle: 'Festive Collection - Limited Time',
+    //   price: 'From 39.99 Espees',
+    //   originalPrice: '79.99 Espees',
+    //   buttonText: 'Get Offer',
+    //   colors: ['#9C27B0', '#7B68EE'] as [string, string],
+    //   productName: 'Holiday Collection'
+    // }
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        const nextIndex = (prevIndex + 1) % promotions.length;
-        // Auto-scroll to the next card with fade transition
-        Animated.sequence([
-          Animated.timing(fadeAnim, {
-            toValue: 0.3,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-        
-        scrollViewRef.current?.scrollTo({
-          x: nextIndex * screenWidth,
-          animated: true
-        });
-        return nextIndex;
-      });
-    }, 6000);
-
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % promotions.length);
+    }, 9000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleScroll = (event: any) => {
-    const contentOffset = event.nativeEvent.contentOffset.x;
-    const index = Math.round(contentOffset / screenWidth);
-    setCurrentIndex(index);
-  };
+  useEffect(() => {
+    slideAnim.setValue(40); // Start slightly to the right
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, [currentIndex]);
+
+  const currentPromotion = promotions[currentIndex];
 
   return (
-    <View className="flex mb-4 justify-center w-full">
-      <View className="relative">
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <ScrollView
-            ref={scrollViewRef}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            scrollEnabled={true}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-            className="h-40"
-            contentContainerStyle={{ alignItems: 'center' }}
+    <View style={styles.promotionContainer}>
+      <Animated.View style={{ width: '100%', transform: [{ translateX: slideAnim }] }}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => onBuyNow(currentPromotion)}
+          style={styles.promotionCard}
+        >
+          <LinearGradient
+            colors={currentPromotion.colors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.promotionGradient}
           >
-            {promotions.map((promotion, index) => (
-              <View key={promotion.id} style={{ width: screenWidth, alignItems: 'center' }}>
-                <LinearGradient
-                  colors={promotion.colors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  className="p-6 h-full"
-                  style={{
-                    borderRadius: 16,
-                    paddingHorizontal: 20,
-                    paddingVertical: 24,
-                    marginHorizontal: 16,
-                    shadowColor: promotion.colors[0],
-                    shadowOffset: { width: 0, height: 8 },
-                    shadowOpacity: 0.25,
-                    shadowRadius: 12,
-                    elevation: 8,
-                    width: screenWidth - 32,
-                    alignSelf: 'center',
-                  }}
-                >
-                  <Text className="text-base font-bold text-white mb-2" style={{ fontWeight: '700' }}>{promotion.title}</Text>
-                  <Text className="text-white mb-4 text-sm" style={{ fontWeight: '400', opacity: 0.9 }}>{promotion.subtitle}</Text>
-                  <View className="flex-row items-center justify-between">
-                    <View>
-                      <Text className="text-xl font-bold text-white" style={{ fontWeight: '700' }}>{promotion.price}</Text>
-                      {promotion.originalPrice && (
-                        <Text className="text-white line-through ml-2 text-sm" style={{ fontWeight: '400', opacity: 0.7 }}>{promotion.originalPrice}</Text>
-                      )}
-                    </View>
-                    <TouchableOpacity
-                      className="bg-white px-4 py-2 rounded-full"
-                      onPress={() => onBuyNow(promotion)}
-                      style={{
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 3
-                      }}
-                    >
-                      <Text className="text-orange-500 font-semibold" style={{ fontWeight: '600' }}>{promotion.buttonText}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </LinearGradient>
+            <View className="h-full justify-between">
+              <View>
+                <Text className="text-white text-2xl font-bold mb-1">
+                  {currentPromotion.title}
+                </Text>
+                <Text className="text-white text-base opacity-90">
+                  {currentPromotion.subtitle}
+                </Text>
               </View>
-            ))}
-          </ScrollView>
-        </Animated.View>
-      </View>
+              
+              <View className="flex-row items-center justify-between mt-4">
+                <View>
+                  <Text className="text-white text-2xl font-bold">
+                    {currentPromotion.price}
+                  </Text>
+                  {currentPromotion.originalPrice && (
+                    <Text className="text-white opacity-70 line-through">
+                      {currentPromotion.originalPrice}
+                    </Text>
+                  )}
+                </View>
+                <TouchableOpacity
+                  className="bg-white px-4 py-2 rounded-full"
+                  style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' }}
+                >
+                  <Text className="text-primary font-semibold">
+                    {currentPromotion.buttonText}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
 };
 
-// Product Grid Component
+const PRODUCT_GRID_GAP = 16;
+const PRODUCT_GRID_COLUMNS = 2;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = (SCREEN_WIDTH - (PRODUCT_GRID_GAP * (PRODUCT_GRID_COLUMNS + 1))) / PRODUCT_GRID_COLUMNS;
+
 const ProductGrid: React.FC<{
   products: Product[];
   onProductPress: (product: Product) => void;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product) => Promise<void>;
   loading: boolean;
-}> = ({ products, onProductPress, onAddToCart, loading }) => {
+  contentContainerStyle?: any;
+}> = ({ products, onProductPress, onAddToCart, loading, contentContainerStyle }) => {
   const LoadingCard = () => {
-    const pulse = () => {
-      const pulseAnim = new Animated.Value(1);
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 0.5,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-      return pulseAnim;
-    };
-
     return (
-      <View className="w-[48%] mb-4">
-        <Animated.View
-          className="bg-white rounded-xl p-4"
-          style={{
-            opacity: pulse(),
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            elevation: 6,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: '#E1E8ED'
-          }}
-        >
-          <View className="w-full h-32 bg-gray-200 rounded-lg mb-3" />
-          <View className="space-y-2">
-            <View className="h-4 bg-gray-200 rounded" />
-            <View className="h-3 bg-gray-200 rounded w-3/4" />
-            <View className="h-3 bg-gray-200 rounded w-1/2" />
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: PRODUCT_GRID_GAP, justifyContent: 'space-between' }}>
+        {Array.from({ length: 6 }).map((_, index) => (
+          <View key={index} style={{ width: CARD_WIDTH, marginBottom: PRODUCT_GRID_GAP }}>
+            <View className="bg-white rounded-xl overflow-hidden mb-4" style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 6,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: '#E1E8ED'
+            }}>
+              <View className="h-52 bg-gray-200 animate-pulse" />
+              <View className="p-3">
+                <View className="h-4 bg-gray-200 rounded mb-2 animate-pulse" />
+                <View className="h-3 bg-gray-200 rounded mb-2 animate-pulse" style={{ width: '60%' }} />
+                <View className="flex-row justify-between items-center">
+                  <View className="h-4 bg-gray-200 rounded animate-pulse" style={{ width: '40%' }} />
+                  <View className="h-6 bg-gray-200 rounded-full animate-pulse" style={{ width: 60 }} />
+                </View>
+              </View>
+            </View>
           </View>
-        </Animated.View>
+        ))}
       </View>
     );
   };
 
   if (loading) {
+    return <LoadingCard />;
+  }
+
+  if (products.length === 0) {
     return (
-      <View className="flex-row flex-wrap justify-between">
-        {[1, 2, 3, 4, 5, 6].map((_, index) => (
-          <LoadingCard key={index} />
-        ))}
+      <View className="flex-1 justify-center items-center py-8">
+        <Feather name="package" size={48} color="#657786" />
+        <Text className="text-gray-500 text-lg font-medium mt-4">No products found</Text>
+        <Text className="text-gray-400 text-sm text-center mt-2">
+          Try adjusting your search or browse our categories
+        </Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-row flex-wrap justify-between">
-      {products.map((product) => (
+    <FlatList
+      data={products}
+      keyExtractor={(item) => item.id}
+      numColumns={PRODUCT_GRID_COLUMNS}
+      columnWrapperStyle={{ gap: PRODUCT_GRID_GAP, marginBottom: PRODUCT_GRID_GAP }}
+      contentContainerStyle={{ ...contentContainerStyle }}
+      renderItem={({ item }) => (
         <ProductCard
-          key={product.id}
-          product={product}
-          onPress={() => onProductPress(product)}
-          onAddToCart={onAddToCart}
+          product={item}
+          onPress={() => onProductPress(item)}
+          onAddToCart={async (p) => { await onAddToCart(p); }}
+          cardWidth={CARD_WIDTH}
         />
-      ))}
-    </View>
+      )}
+    />
   );
 };
 
-// Error Screen Component
 const ErrorScreen: React.FC<{ onRetry: () => void }> = ({ onRetry }) => {
   return (
     <SafeAreaView className="flex-1 justify-center items-center" style={{ backgroundColor: '#F5F7FA' }}>
-      <Feather name="alert-triangle" size={60} color="#F44336" />
-      <Text className="text-lg font-semibold mt-4 text-gray-800" style={{ fontWeight: '600' }}>
-        Something went wrong
-      </Text>
-      <Text className="text-gray-500 text-center mt-2 px-8" style={{ fontWeight: '400' }}>
-        We couldn't load the products. Please try again.
-      </Text>
-      <TouchableOpacity
-        onPress={onRetry}
-        className="mt-6 px-6 py-3 rounded-full"
-        style={{
-          backgroundColor: '#4A90E2',
-          shadowColor: '#4A90E2',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 6
-        }}
-      >
-        <Text className="text-white font-semibold" style={{ fontWeight: '600' }}>Retry</Text>
-      </TouchableOpacity>
+      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+      <View className="items-center px-8">
+        <Feather name="wifi-off" size={64} color="#657786" />
+        <Text className="text-gray-800 text-xl font-semibold mt-4 mb-2">Connection Error</Text>
+        <Text className="text-gray-600 text-center mb-6">
+          Unable to load products. Please check your internet connection and try again.
+        </Text>
+        <TouchableOpacity
+          onPress={onRetry}
+          className="bg-blue-500 px-6 py-3 rounded-full"
+        >
+          <Text className="text-white font-semibold">Retry</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
 
-// Search Results Component
 const SearchResults: React.FC<{
   products: Product[];
   searchQuery: string;
@@ -416,59 +364,77 @@ const SearchResults: React.FC<{
 }> = ({ products, searchQuery, onProductPress, onAddToCart, onBack, onSearchChange }) => {
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: '#F5F7FA' }}>
-      <StoreSearch
-        onBack={onBack}
-        searchQuery={searchQuery}
-        onSearchChange={onSearchChange}
-      />
-      
-      <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
-        {searchQuery && (
-          <Text className="text-gray-500 text-sm mb-4" style={{ fontWeight: '500' }}>
-            {products.length} product{products.length !== 1 ? 's' : ''} found
-          </Text>
-        )}
-        {products.length === 0 ? (
-          <View className="items-center justify-center py-12">
-            <Feather name="search" size={48} color="#657786" />
-            <Text className="text-gray-500 text-lg font-medium mt-4" style={{ fontWeight: '500' }}>
-              {searchQuery ? 'No products found' : 'Start typing to search'}
-            </Text>
-            {searchQuery && <Text className="text-gray-400 mt-2" style={{ fontWeight: '400' }}>Try different keywords</Text>}
-          </View>
-        ) : (
-          <View className="flex-row flex-wrap justify-between">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onPress={() => onProductPress(product)}
-                onAddToCart={onAddToCart}
+      <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
+      <View className="flex-1">
+        <View className="p-4" style={{ paddingBottom: 0 }}>
+          <View className="flex-row items-center" style={{ marginBottom: 16 }}>
+            <TouchableOpacity onPress={onBack} className="p-2" style={{ marginRight: 8 }}>
+              <Feather name="arrow-left" size={24} color="#657786" />
+            </TouchableOpacity>
+            <View className="flex-1">
+              <TextInput
+                value={searchQuery}
+                onChangeText={onSearchChange}
+                placeholder="Search products..."
+                className="w-full px-4 py-3 rounded-xl text-sm text-gray-800"
+                placeholderTextColor="#657786"
+                style={{
+                  backgroundColor: '#fff',
+                  borderRadius: 20,
+                  fontWeight: '400',
+                }}
               />
-            ))}
+            </View>
           </View>
-        )}
-      </ScrollView>
+
+          <View className="flex-row items-center justify-between" style={{ marginBottom: 20 }}>
+            <Text className="text-gray-800 text-lg font-semibold">
+              Search Results
+            </Text>
+            <Text className="text-gray-600 text-sm">
+              {products.length} {products.length === 1 ? 'item' : 'items'}
+            </Text>
+          </View>
+        </View>
+        <ProductGrid
+          products={products}
+          onProductPress={onProductPress}
+          onAddToCart={async (product) => {
+            await onAddToCart(product);
+          }}
+          loading={false}
+          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 24 }}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
-// Main Enhanced Store App
+// Utility to pad data for grid centering
+function padGridData<T extends { id: string }>(data: T[], columns: number): (T & { empty?: boolean })[] {
+  const fullRows = Math.floor(data.length / columns);
+  const lastRowItems = data.length - fullRows * columns;
+  if (lastRowItems === 0) return data;
+  return [
+    ...data,
+    ...Array.from({ length: columns - lastRowItems }).map((_, i) => ({ id: `empty-${i}`, empty: true } as T & { empty: boolean }))
+  ];
+}
+
 const EnhancedStoreApp: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('store');
+  const [products, setProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState<Product[]>([]);
+  const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [loading2, setLoading2] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState('All');
 
   const { cart, addToCart, fetchUserCart } = useUserCart();
   const { userId, userDetails } = useUser();
-  const router = useRouter();
 
-  const categories = ['All', 'Pastors', 'Principals', 'Teachers', 'Students'];
+  const categories = ['All', 'Books', 'Uniforms', 'Accessories', 'Electronics'];
 
   const fetchProducts = async () => {
     try {
@@ -537,7 +503,7 @@ const EnhancedStoreApp: React.FC = () => {
     }
   };
 
-  const updateCartQuantity = async (id: number, newQuantity: number) => {
+  const updateCartQuantity = async (id: string, newQuantity: number) => {
     try {
       if (newQuantity <= 0) {
         await axios.patch(`${API_URL}/cart/decrease`, {
@@ -578,37 +544,93 @@ const EnhancedStoreApp: React.FC = () => {
         return (
           <SafeAreaView className="flex-1 pb-[87px]" style={{ backgroundColor: '#F5F7FA' }}>
             <StatusBar barStyle="dark-content" backgroundColor="#F5F7FA" />
-            <View className="flex-1">
-              <View className="p-4 space-y-4 pb-16">
-                <EnhancedStoreHeader
-                  cartCount={cartCount}
-                  onSearchPress={() => setCurrentView('search')}
-                  onCartPress={() => setCurrentView('cart')}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  showSearch={false}
-                />
-                
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  <AutoScrollingPromotionFlyer
-                    onBuyNow={(promotion) => {
-                      const product = products.find((p) => p.name === promotion.productName);
-                      if (product) {
-                        addToCart(product);
-                      }
-                    }}
-                  />
-                  <ProductGrid
-                    products={filteredProducts}
-                    onProductPress={(product) => {
-                      setSelectedProduct(product);
-                      setCurrentView('productDetail');
-                    }}
-                    onAddToCart={addToCart}
-                    loading={loading}
-                  />
-                </ScrollView>
-              </View>
+            <View className="flex-1 items-center">
+              <FlatList
+                data={padGridData(filteredProducts, PRODUCT_GRID_COLUMNS)}
+                keyExtractor={(item) => item.id}
+                numColumns={PRODUCT_GRID_COLUMNS}
+                columnWrapperStyle={{ gap: PRODUCT_GRID_GAP, marginBottom: PRODUCT_GRID_GAP }}
+                contentContainerStyle={{ paddingBottom: 16, paddingHorizontal: 16 }}
+                ListHeaderComponent={
+                  <>
+                    <View style={{ paddingHorizontal: 0, paddingTop: 16, paddingBottom: 16 }}>
+                      <EnhancedStoreHeader
+                        cartCount={cartCount}
+                        onSearchPress={() => setCurrentView('search')}
+                        onCartPress={() => setCurrentView('cart')}
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                        showSearch={false}
+                      />
+                      <View style={{ marginTop: 16 }}>
+                        <AutoScrollingPromotionFlyer
+                          onBuyNow={(promotion) => {
+                            const product = products.find((p) => p.name === promotion.productName);
+                            if (product) {
+                              addToCart(product);
+                            }
+                          }}
+                        />
+                      </View>
+                    </View>
+                  </>
+                }
+                renderItem={({ item }) =>
+                  item.empty ? (
+                    <View style={{paddingHorizontal: PRODUCT_GRID_GAP, width: CARD_WIDTH, marginBottom: PRODUCT_GRID_GAP, backgroundColor: 'transparent' }} />
+                  ) : (
+                    <ProductCard
+                      product={item}
+                      onPress={() => {
+                        setSelectedProduct(item);
+                        setCurrentView('productDetail');
+                      }}
+                      onAddToCart={async (p) => {
+                        await addToCart(p);
+                      }}
+                      cardWidth={CARD_WIDTH}
+                    />
+                  )
+                }
+                ListEmptyComponent={
+                  loading ? (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: PRODUCT_GRID_GAP, justifyContent: 'space-between', paddingHorizontal: PRODUCT_GRID_GAP }}>
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <View key={index} style={{ width: CARD_WIDTH, marginBottom: PRODUCT_GRID_GAP }}>
+                          <View className="bg-white rounded-xl overflow-hidden mb-4" style={{
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowOpacity: 0.15,
+                            shadowRadius: 8,
+                            elevation: 6,
+                            borderRadius: 16,
+                            borderWidth: 1,
+                            borderColor: '#E1E8ED'
+                          }}>
+                            <View className="h-52 bg-gray-200 animate-pulse" />
+                            <View className="p-3">
+                              <View className="h-4 bg-gray-200 rounded mb-2 animate-pulse" />
+                              <View className="h-3 bg-gray-200 rounded mb-2 animate-pulse" style={{ width: '60%' }} />
+                              <View className="flex-row justify-between items-center">
+                                <View className="h-4 bg-gray-200 rounded animate-pulse" style={{ width: '40%' }} />
+                                <View className="h-6 bg-gray-200 rounded-full animate-pulse" style={{ width: 60 }} />
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  ) : (
+                    <View className="flex-1 justify-center items-center py-8">
+                      <Feather name="package" size={48} color="#657786" />
+                      <Text className="text-gray-500 text-lg font-medium mt-4">No products found</Text>
+                      <Text className="text-gray-400 text-sm text-center mt-2">
+                        Try adjusting your search or browse our categories
+                      </Text>
+                    </View>
+                  )
+                }
+              />
             </View>
           </SafeAreaView>
         );
@@ -622,7 +644,9 @@ const EnhancedStoreApp: React.FC = () => {
               setSelectedProduct(product);
               setCurrentView('productDetail');
             }}
-            onAddToCart={addToCart}
+            onAddToCart={async (product) => {
+              await addToCart(product);
+            }}
             onBack={() => {
               setCurrentView('store');
               setSearchQuery('');
@@ -663,4 +687,36 @@ const EnhancedStoreApp: React.FC = () => {
   );
 };
 
-export default EnhancedStoreApp;
+const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'center',
+    paddingHorizontal: 0,
+    paddingVertical: 6,
+    // backgroundColor: 'transparent',
+    borderRadius: 20,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 2 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 3,
+  },
+  promotionContainer: {
+    marginBottom: 24,
+  },
+  promotionCard: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  promotionGradient: {
+    padding: 24,
+    height: 160,
+  },
+});export default EnhancedStoreApp;
+

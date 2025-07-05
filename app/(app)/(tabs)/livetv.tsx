@@ -266,12 +266,12 @@ export default function LiveTV() {
                             
                             {/* Program Title Section */}
                             <View className="px-4 pt-4 pb-2">
-                                <View className="flex-row items-center mb-2">
+                                {/* <View className="flex-row items-center mb-2">
                                     <View className="w-3 h-3 bg-red-500 rounded-full mr-2" />
                                     <Text className="text-sm text-red-500 font-semibold" style={{ fontWeight: '600' }}>
                                         LIVE NOW
                                     </Text>
-                                </View>
+                                </View> */}
                                 <Text className="text-xl font-bold text-gray-800" style={{ fontWeight: '700' }}>
                                     {title || 'Live Program'}
                                 </Text>
