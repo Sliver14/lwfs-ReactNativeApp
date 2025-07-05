@@ -6,8 +6,6 @@ import { VideoView, useVideoPlayer } from 'expo-video';
 import { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
-    Animated,
-    AppState,
     Dimensions,
     FlatList,
     KeyboardAvoidingView,
@@ -20,24 +18,13 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
 const defaultVideoHeight = screenWidth * (9 / 16);
 
-const relatedStreams = [
-    { id: 1, title: "Morning Prayer", viewers: 1247, thumbnailColor: "#4A90E2" },
-    { id: 2, title: "Bible Study", viewers: 856, thumbnailColor: "#F5A623" },
-    { id: 3, title: "Evening Service", viewers: 2103, thumbnailColor: "#7ED321" },
-];
-
 export default function LiveTV() {
-    const insets = useSafeAreaInsets();
     const isFocused = useIsFocused();
     const [messageInput, setMessageInput] = useState('');
-    const [viewerCountDisplay, setViewerCountDisplay] = useState(1247);
-    const [isBuffering, setIsBuffering] = useState(true);
 
     const {
         currentProgram,
@@ -53,36 +40,17 @@ export default function LiveTV() {
     // Create video player instance
     const player = useVideoPlayer(currentProgram?.videoUrl || '');
 
-    const fadeAnim = useRef(new Animated.Value(0)).current;
     const chatScrollRef = useRef<FlatList>(null);
-    const appState = useRef(AppState.currentState);
-
     const { userToken, loading } = useAuth();
 
+    // Record participation when program ID changes
     useEffect(() => {
-        if (currentProgram?.viewerCount !== undefined) {
-            setViewerCountDisplay(currentProgram.viewerCount);
-        }
-        if (currentProgram?.id) {
+        if (currentProgram?.id && isFocused) {
             recordParticipation();
         }
-    }, [currentProgram, recordParticipation]);
+    }, [currentProgram, recordParticipation, isFocused]);
 
-    useEffect(() => {
-        const subscription = AppState.addEventListener('change', (nextAppState) => {
-            appState.current = nextAppState;
-        });
-        return () => subscription.remove();
-    }, []);
-
-    useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 1000,
-            useNativeDriver: true,
-        }).start();
-    }, [fadeAnim]);
-
+    // Scroll to end of comments when new comments are added
     useEffect(() => {
         if (comments.length > 0) {
             setTimeout(() => {
@@ -103,59 +71,23 @@ export default function LiveTV() {
         const lastName = item.user?.lastName || '';
         const initials = `${firstName.charAt(0).toUpperCase()}${lastName.charAt(0).toUpperCase()}`;
         
-        // Generate random beautiful colors for user avatars
         const beautifulColors = [
-            '#FF6B6B', // Coral Red
-            '#4ECDC4', // Turquoise
-            '#45B7D1', // Sky Blue
-            '#96CEB4', // Mint Green
-            '#FFEAA7', // Soft Yellow
-            '#DDA0DD', // Plum
-            '#98D8C8', // Seafoam
-            '#F7DC6F', // Golden Yellow
-            '#BB8FCE', // Lavender
-            '#85C1E9', // Light Blue
-            '#F8C471', // Peach
-            '#82E0AA', // Light Green
-            '#F1948A', // Salmon
-            '#85C1E9', // Powder Blue
-            '#D7BDE2', // Light Purple
-            '#FAD7A0', // Apricot
-            '#A9CCE3', // Baby Blue
-            '#ABEBC6', // Light Mint
-            '#F9E79F', // Cream
-            '#D5A6BD', // Rose Pink
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+            '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+            '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+            '#FAD7A0', '#A9CCE3', '#ABEBC6', '#F9E79F', '#D5A6BD',
         ];
         
-        // Use initials to generate a consistent random color
         const colorIndex = Math.abs((initials.charCodeAt(0) + initials.charCodeAt(1)) % beautifulColors.length);
         const avatarColor = beautifulColors[colorIndex];
         
         return (
-            <Animated.View
-                style={{
-                    opacity: fadeAnim,
-                    transform: [
-                        {
-                            translateY: fadeAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [20, 0],
-                            }),
-                        },
-                    ],
-                }}
+            <View
                 className="flex-row px-2 gap-4 align-center items-center space-x-4 mb-3"
             >
                 <View 
                     className="w-10 h-10 rounded-full items-center justify-center"
-                    style={{
-                        backgroundColor: avatarColor,
-                        shadowColor: avatarColor,
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                        elevation: 6,
-                    }}
+                    style={{ backgroundColor: avatarColor }}
                 >
                     <Text className="text-white font-bold text-sm" style={{ fontWeight: '700' }}>{initials}</Text>
                 </View>
@@ -175,30 +107,9 @@ export default function LiveTV() {
                     </View>
                     <Text className="text-sm text-gray-700 mt-1" style={{ fontWeight: '400' }}>{item.content}</Text>
                 </View>
-            </Animated.View>
+            </View>
         );
     };
-
-    const renderRelatedStream = ({ item }: { item: typeof relatedStreams[0] }) => (
-        <View className="bg-white rounded-xl overflow-hidden" style={{
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.15,
-            shadowRadius: 8,
-            elevation: 6,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: '#E1E8ED'
-        }}>
-            <View style={[styles.thumbnail, { backgroundColor: item.thumbnailColor }]}>
-                <Feather name="play" size={32} color="#fff" />
-            </View>
-            <View className="p-3">
-                <Text className="font-semibold text-sm text-gray-800" style={{ fontWeight: '600' }}>{item.title}</Text>
-                <Text className="text-xs text-gray-500" style={{ fontWeight: '400' }}>🔴 {item.viewers} viewers</Text>
-            </View>
-        </View>
-    );
 
     if (loadingProgram) {
         return (
@@ -230,7 +141,7 @@ export default function LiveTV() {
         );
     }
 
-    const { title, description } = currentProgram;
+    const { title } = currentProgram;
 
     return (
         <SafeAreaView className="flex-1 pb-[87px]" style={{ backgroundColor: '#F5F7FA' }}>
@@ -241,7 +152,6 @@ export default function LiveTV() {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 >
                     <View style={{ flex: 1, backgroundColor: '#F5F7FA' }}>
-                        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
                         {/* Video Player Section */}
                         <View style={styles.videoSection}>
                             <View
@@ -266,12 +176,6 @@ export default function LiveTV() {
                             
                             {/* Program Title Section */}
                             <View className="px-4 pt-4 pb-2">
-                                {/* <View className="flex-row items-center mb-2">
-                                    <View className="w-3 h-3 bg-red-500 rounded-full mr-2" />
-                                    <Text className="text-sm text-red-500 font-semibold" style={{ fontWeight: '600' }}>
-                                        LIVE NOW
-                                    </Text>
-                                </View> */}
                                 <Text className="text-xl font-bold text-gray-800" style={{ fontWeight: '700' }}>
                                     {title || 'Live Program'}
                                 </Text>
@@ -280,11 +184,6 @@ export default function LiveTV() {
 
                         {/* Live Chat Section */}
                         <View className="bg-white rounded-2xl p-4 mx-4 mb-4" style={{
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 4 },
-                            shadowOpacity: 0.15,
-                            shadowRadius: 8,
-                            elevation: 6,
                             borderRadius: 16,
                             borderWidth: 1,
                             borderColor: '#E1E8ED'
@@ -295,7 +194,7 @@ export default function LiveTV() {
                                 {loadingComments && <ActivityIndicator size="small" color="#453ace" className="ml-2" />}
                             </View>
                             
-                            {/* Message Input - Moved to top */}
+                            {/* Message Input */}
                             <View className="flex-row items-center space-x-2 mb-4 p-3 bg-gray-50 rounded-xl">
                                 <TextInput
                                     value={messageInput}
@@ -330,6 +229,8 @@ export default function LiveTV() {
                                     scrollEnabled={true}
                                     nestedScrollEnabled={true}
                                     renderItem={renderMessage}
+                                    initialNumToRender={10}
+                                    windowSize={5}
                                     contentContainerStyle={styles.chatListContent}
                                     ListEmptyComponent={() => (
                                         !loadingComments && (
@@ -359,7 +260,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#F5F7FA',
+        biggest: '#F5F7FA',
     },
     centerContent: {
         justifyContent: 'center',
@@ -369,21 +270,10 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         backgroundColor: '#fff',
         marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 4,
     },
     videoContainer: {
         backgroundColor: '#000',
         overflow: 'hidden',
-    },
-    thumbnail: {
-        width: '100%',
-        height: 120,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     chatListContent: {
         padding: 16,
