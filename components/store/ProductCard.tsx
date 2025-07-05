@@ -9,6 +9,7 @@ interface ProductCardProps {
     product: Product;
     onPress: () => void;
     onAddToCart: (product: Product) => void;
+    cardWidth?: number;
 }
 
 const getIconComponent = (iconName: string) => {
@@ -21,9 +22,10 @@ const getIconComponent = (iconName: string) => {
     return iconMap[iconName] || Feather;
 };
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAddToCart }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAddToCart, cardWidth }) => {
     const [isAddingToCart, setIsAddingToCart] = useState(false);
-    const IconComponent = getIconComponent(product.iconName);
+    // Removed iconName since it's not in the Prisma schema
+    // const IconComponent = getIconComponent(product.iconName || '');
 
     const handleAddToCart = async (e: any) => {
         e.stopPropagation();

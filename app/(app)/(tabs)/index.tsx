@@ -1,9 +1,9 @@
-import EventCarousel from '@/components/EventCarousal';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Image, SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import EventCarousel from '../../../components/EventCarousal';
 import { useUser } from '../../../contexts/UserContext';
 
 export default function Index() {
@@ -142,10 +142,10 @@ export default function Index() {
                     <View className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full"
                         style={{ transform: [{ translateY: -64 }, { translateX: 64 }] }} />
                     <Text className="text-xl font-bold mb-2 text-white" style={{ fontFamily: 'System', fontWeight: '700' }}>
-                        Summer Sale
+                        Graduation Season
                     </Text>
                     <Text className="text-white mb-4" style={{ fontFamily: 'System', fontWeight: '400', opacity: 0.9 }}>
-                        Up to 50% off on selected items
+                        Up to 20% off on selected items
                     </Text>
                     <TouchableOpacity 
                         className="bg-white px-6 py-3 rounded-full self-start"

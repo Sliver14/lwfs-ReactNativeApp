@@ -3,42 +3,20 @@
 
 import axios from "axios";
 import * as SecureStore from 'expo-secure-store'; // For secure token storage in React Native
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 import { API_URL } from '@/utils/env'; // Ensure API_URL points to your Next.js backend (e.g., 'http://192.168.1.xxx:3000')
+import { Cart, Product } from '../types';
 import { useUser } from "./UserContext"; // Make sure this path is correct
 
-// Define a basic Product interface if you don't have one globally
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    imageUrl: string;
-    // Add any other relevant product properties here
-}
-
-interface CartItem {
-    id: string; // This is the ID of the cart item entry itself in your DB (UUID)
-    productId: number; // This is the ID of the product
-    quantity: number;
-    product: {
-        id: number; // Ensure product also has an ID
-        name: string;
-        price: number;
-        imageUrl: string;
-    };
-}
-
-interface Cart {
-    cartItems: CartItem[];
-}
+// Cart interface is now imported from types
 
 interface UserCartContextType {
     cart: Cart;
     fetchUserCart: () => Promise<void>;
     addToCart: (product: Product) => Promise<void>; // <--- New: Add to Cart function
-    increaseItemQuantity: (productId: number) => Promise<void>;
-    decreaseItemQuantity: (productId: number) => Promise<void>;
+    increaseItemQuantity: (productId: string) => Promise<void>;
+    decreaseItemQuantity: (productId: string) => Promise<void>;
     removeCartItemById: (cartItemId: string) => Promise<void>;
     clearUserCart: () => Promise<void>;
 }
@@ -145,7 +123,7 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
 
     // --- Existing Cart Operations ---
 
-    const increaseItemQuantity = useCallback(async (productId: number) => {
+    const increaseItemQuantity = useCallback(async (productId: string) => {
         const token = await getAuthToken();
         if (!token) {
             console.warn("Increase Quantity: No authentication token found.");
@@ -184,7 +162,7 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [fetchUserCart]);
 
-    const decreaseItemQuantity = useCallback(async (productId: number) => {
+    const decreaseItemQuantity = useCallback(async (productId: string) => {
         const token = await getAuthToken();
         if (!token) {
             console.warn("Decrease Quantity: No authentication token found.");

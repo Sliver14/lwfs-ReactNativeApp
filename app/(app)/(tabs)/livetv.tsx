@@ -295,29 +295,8 @@ export default function LiveTV() {
                                 {loadingComments && <ActivityIndicator size="small" color="#453ace" className="ml-2" />}
                             </View>
                             
-                            <View style={{ minHeight: 160, maxHeight: 250, backgroundColor: '#F6F8FA', borderRadius: 8 }}>
-                                <FlatList
-                                    ref={chatScrollRef}
-                                    data={comments}
-                                    keyExtractor={(item) => item.id.toString()}
-                                    showsVerticalScrollIndicator={true}
-                                    scrollEnabled={true}
-                                    nestedScrollEnabled={true}
-                                    renderItem={renderMessage}
-                                    contentContainerStyle={styles.chatListContent}
-                                    ListEmptyComponent={() => (
-                                        !loadingComments && (
-                                            <View className="py-4">
-                                                <Text className="text-gray-500 text-sm text-center" style={{ fontWeight: '400' }}>
-                                                    No comments yet. Be the first to say something!
-                                                </Text>
-                                            </View>
-                                        )
-                                    )}
-                                />
-                            </View>
-                            
-                            <View className="flex-row items-center space-x-2 mt-4 p-3 bg-gray-50 rounded-xl">
+                            {/* Message Input - Moved to top */}
+                            <View className="flex-row items-center space-x-2 mb-4 p-3 bg-gray-50 rounded-xl">
                                 <TextInput
                                     value={messageInput}
                                     onChangeText={setMessageInput}
@@ -340,6 +319,28 @@ export default function LiveTV() {
                                         color={messageInput.trim() ? '#453ace' : '#657786'}
                                     />
                                 </TouchableOpacity>
+                            </View>
+                            
+                            <View style={{ minHeight: 160, maxHeight: 250, backgroundColor: '#F6F8FA', borderRadius: 8 }}>
+                                <FlatList
+                                    ref={chatScrollRef}
+                                    data={comments}
+                                    keyExtractor={(item) => item.id.toString()}
+                                    showsVerticalScrollIndicator={true}
+                                    scrollEnabled={true}
+                                    nestedScrollEnabled={true}
+                                    renderItem={renderMessage}
+                                    contentContainerStyle={styles.chatListContent}
+                                    ListEmptyComponent={() => (
+                                        !loadingComments && (
+                                            <View className="py-4">
+                                                <Text className="text-gray-500 text-sm text-center" style={{ fontWeight: '400' }}>
+                                                    No comments yet. Be the first to say something!
+                                                </Text>
+                                            </View>
+                                        )
+                                    )}
+                                />
                             </View>
                         </View>
                     </View>

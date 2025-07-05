@@ -23,7 +23,8 @@ const getIconComponent = (iconName: string) => {
 const CartItemComponentInternal: React.FC<CartItemProps> = ({ item }) => {
     const { increaseItemQuantity, decreaseItemQuantity, removeCartItemById } = useUserCart();
     const product = item.product;
-    const IconComponent = getIconComponent(item.iconName);
+    // Removed iconName since it's not in the Prisma schema
+    // const IconComponent = getIconComponent(item.iconName);
 
     const handleIncreaseQuantity = React.useCallback(() => {
         if (product?.id) {
@@ -38,7 +39,7 @@ const CartItemComponentInternal: React.FC<CartItemProps> = ({ item }) => {
     }, [product?.id, decreaseItemQuantity]);
 
     return (
-        <Card className="flex-row items-center p-4 gap-4" style={{ marginBottom: 8 }}>
+        <Card className="flex-row items-center p-4 gap-4 mb-2">
             <View className="w-16 h-16 bg-gray-100 rounded-lg items-center justify-center">
                 <Image
                     source={{ uri: product?.imageUrl }}

@@ -2,20 +2,10 @@
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Product } from '../../types';
 import { Badge } from '../shared/Badge';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image?: string;
-  imageUrl?: string;
-  iconName?: string;
-}
 
 interface ProductDetailProps {
     product: Product;
@@ -42,7 +32,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({
                                                                 cartCount,
                                                                 onCartPress
                                                             }) => {
-    const IconComponent = getIconComponent(product.iconName || '');
+    // Removed iconName since it's not in the Prisma schema
+    // const IconComponent = getIconComponent(product.iconName || '');
 
     return (
         <ScrollView className="flex-1 bg-gray-50 mb-[50px]" showsVerticalScrollIndicator={false}>

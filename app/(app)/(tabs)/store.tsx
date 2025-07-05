@@ -150,7 +150,7 @@ const AutoScrollingPromotionFlyer: React.FC<{
       price: '45.7 Espees',
       originalPrice: '55.5 Espees',
       buttonText: 'Buy Now',
-      colors: ['#0c0c5f', '#3d3d8f'] as [string, string],
+      colors: ['#667eea', '#764ba2'] as [string, string], // Beautiful purple-blue gradient
       productName: 'Doctorate Graduation Gown'
     },
     {
@@ -160,29 +160,9 @@ const AutoScrollingPromotionFlyer: React.FC<{
       price: 'From 29.99 Espees',
       originalPrice: '',
       buttonText: 'Shop Now',
-      colors: ['#ffe800', '#fea601'] as [string, string],
+      colors: ['#f093fb', '#f5576c'] as [string, string], // Stunning pink-red gradient
       productName: 'Student Combo'
     }
-    // ,{
-    //   id: 3,
-    //   title: 'Back to School',
-    //   subtitle: 'School Supplies & Uniforms',
-    //   price: 'From 19.99 Espees',
-    //   originalPrice: '',
-    //   buttonText: 'Explore',
-    //   colors: ['#4CAF50', '#8BC34A'] as [string, string],
-    //   productName: 'School Supplies'
-    // },
-    // {
-    //   id: 4,
-    //   title: 'Holiday Special',
-    //   subtitle: 'Festive Collection - Limited Time',
-    //   price: 'From 39.99 Espees',
-    //   originalPrice: '79.99 Espees',
-    //   buttonText: 'Get Offer',
-    //   colors: ['#9C27B0', '#7B68EE'] as [string, string],
-    //   productName: 'Holiday Collection'
-    // }
   ];
 
   useEffect(() => {
@@ -532,7 +512,7 @@ const EnhancedStoreApp: React.FC = () => {
       )
     : activeCategory === 'All'
     ? products
-    : products.filter((product) => product.category === activeCategory);
+    : products; // Removed category filter since it's not in the Prisma schema
 
   const renderCurrentView = () => {
     if (error && currentView === 'store') {
