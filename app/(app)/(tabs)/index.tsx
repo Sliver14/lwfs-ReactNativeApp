@@ -3,7 +3,6 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import React from "react";
 import { Image, SafeAreaView, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { useUser } from '../../../contexts/UserContext';
 
@@ -19,10 +18,18 @@ export default function Index() {
         }
     };
 
+    const handleTestimonies = async () => {
+        try {
+            await WebBrowser.openBrowserAsync('https://lwfoundationschool.org/testimonybank/');
+        } catch (error) {
+            console.error('Error opening testimonies:', error);
+        }
+    };
+
     const quickActions = [
         { icon: 'tv' as const, label: 'Watch Live', color: '#F44336', gradient: ['#F44336', '#E91E63'] as [string, string], action: () => router.push('/livetv') },
         { icon: 'search' as const, label: 'Online Class', color: '#7B68EE', gradient: ['#7B68EE', '#9C27B0'] as [string, string], action: handleOnlineClass },
-        { icon: 'star' as const, label: 'Testimonies', color: '#FFD93D', gradient: ['#FFD93D', '#FF9800'] as [string, string], action: () => router.push('/testimony/testimony') },
+        { icon: 'star' as const, label: 'Testimonies', color: '#FFD93D', gradient: ['#FFD93D', '#FF9800'] as [string, string], action: handleTestimonies },
         { icon: 'storefront' as const, label: 'Store', color: '#4CAF50', gradient: ['#4CAF50', '#8BC34A'] as [string, string], action: () => router.push('/store') }
     ];
 
