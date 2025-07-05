@@ -1,7 +1,7 @@
 // components/store/ProductCard.tsx
 import { Feather, MaterialIcons } from '@expo/vector-icons';
-import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
 import { Product } from '../../types';
 import { Card } from '../shared/Card';
 
@@ -22,7 +22,18 @@ const getIconComponent = (iconName: string) => {
 };
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAddToCart }) => {
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
     const IconComponent = getIconComponent(product.iconName);
+
+    const handleAddToCart = async (e: any) => {
+        e.stopPropagation();
+        setIsAddingToCart(true);
+        try {
+            await onAddToCart(product);
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
 
     return (
         <Card onPress={onPress} className="w-[48%] mb-4 overflow-hidden">
@@ -43,13 +54,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAd
                 <View className="flex-row justify-between items-center">
                     <Text className="font-bold text-sm">{product.price} Espees</Text>
                     <TouchableOpacity
-                        className="bg-[#3b82f6] px-3 py-1 rounded-full"
-                        onPress={(e) => {
-                            e.stopPropagation();
-                            onAddToCart(product);
-                        }}
+                        className="bg-[#453ace] px-3 py-1 rounded-full"
+                        onPress={handleAddToCart}
+                        disabled={isAddingToCart}
                     >
-                        <Text className="text-white text-xs font-medium">Add</Text>
+                        {isAddingToCart ? (
+                            <ActivityIndicator size="small" color="white" />
+                        ) : (
+                            <Text className="text-white text-xs font-medium">Add</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

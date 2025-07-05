@@ -1,24 +1,24 @@
-import VideoScreen from '@/components/videoplayer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLiveTv } from '@/contexts/LiveTvContext';
 import { Feather } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
-import React, { useEffect, useRef, useState } from 'react';
+import { VideoView, useVideoPlayer } from 'expo-video';
+import { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  Animated,
-  AppState,
-  Dimensions,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Animated,
+    AppState,
+    Dimensions,
+    FlatList,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -49,6 +49,9 @@ export default function LiveTV() {
         postComment,
         recordParticipation,
     } = useLiveTv();
+
+    // Create video player instance
+    const player = useVideoPlayer(currentProgram?.videoUrl || '');
 
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const chatScrollRef = useRef<FlatList>(null);
@@ -100,20 +103,33 @@ export default function LiveTV() {
         const lastName = item.user?.lastName || '';
         const initials = `${firstName.charAt(0).toUpperCase()}${lastName.charAt(0).toUpperCase()}`;
         
-        // Generate consistent color based on user initials using design system colors
-        const colors = [
-            ['#F44336', '#E91E63'], // Red
-            ['#4CAF50', '#8BC34A'], // Green
-            ['#2196F3', '#4A90E2'], // Blue
-            ['#FF9800', '#FF8C42'], // Orange
-            ['#9C27B0', '#7B68EE'], // Purple
-            ['#00BCD4', '#4CAF50'], // Cyan
-            ['#FF5722', '#FF8C42'], // Deep Orange
-            ['#795548', '#8D6E63'], // Brown
+        // Generate random beautiful colors for user avatars
+        const beautifulColors = [
+            '#FF6B6B', // Coral Red
+            '#4ECDC4', // Turquoise
+            '#45B7D1', // Sky Blue
+            '#96CEB4', // Mint Green
+            '#FFEAA7', // Soft Yellow
+            '#DDA0DD', // Plum
+            '#98D8C8', // Seafoam
+            '#F7DC6F', // Golden Yellow
+            '#BB8FCE', // Lavender
+            '#85C1E9', // Light Blue
+            '#F8C471', // Peach
+            '#82E0AA', // Light Green
+            '#F1948A', // Salmon
+            '#85C1E9', // Powder Blue
+            '#D7BDE2', // Light Purple
+            '#FAD7A0', // Apricot
+            '#A9CCE3', // Baby Blue
+            '#ABEBC6', // Light Mint
+            '#F9E79F', // Cream
+            '#D5A6BD', // Rose Pink
         ];
         
-        const colorIndex = (initials.charCodeAt(0) + initials.charCodeAt(1)) % colors.length;
-        const avatarColors = colors[colorIndex];
+        // Use initials to generate a consistent random color
+        const colorIndex = Math.abs((initials.charCodeAt(0) + initials.charCodeAt(1)) % beautifulColors.length);
+        const avatarColor = beautifulColors[colorIndex];
         
         return (
             <Animated.View
@@ -133,8 +149,8 @@ export default function LiveTV() {
                 <View 
                     className="w-10 h-10 rounded-full items-center justify-center"
                     style={{
-                        backgroundColor: avatarColors[0],
-                        shadowColor: avatarColors[0],
+                        backgroundColor: avatarColor,
+                        shadowColor: avatarColor,
                         shadowOffset: { width: 0, height: 4 },
                         shadowOpacity: 0.3,
                         shadowRadius: 8,
@@ -239,9 +255,12 @@ export default function LiveTV() {
                                     },
                                 ]}
                             >
-                                <VideoScreen
-                                    videoSource={currentProgram?.videoUrl || ''}
+                                <VideoView
+                                    player={player}
                                     style={{ width: '100%', height: '100%' }}
+                                    contentFit="contain"
+                                    nativeControls={true}
+                                    allowsFullscreen={true}
                                 />
                             </View>
                         </View>
@@ -258,9 +277,9 @@ export default function LiveTV() {
                             borderColor: '#E1E8ED'
                         }}>
                             <View className="flex-row items-center mb-4">
-                                <Feather name="message-circle" size={20} color="#4A90E2" />
+                                <Feather name="message-circle" size={20} color="#453ace" />
                                 <Text className="font-semibold text-lg text-gray-800 ml-2" style={{ fontWeight: '600' }}>Live Chat</Text>
-                                {loadingComments && <ActivityIndicator size="small" color="#4A90E2" className="ml-2" />}
+                                {loadingComments && <ActivityIndicator size="small" color="#453ace" className="ml-2" />}
                             </View>
                             
                             <View style={{ minHeight: 160, maxHeight: 250, backgroundColor: '#F6F8FA', borderRadius: 8 }}>
@@ -305,7 +324,7 @@ export default function LiveTV() {
                                     <Feather
                                         name="send"
                                         size={20}
-                                        color={messageInput.trim() ? '#4A90E2' : '#657786'}
+                                        color={messageInput.trim() ? '#453ace' : '#657786'}
                                     />
                                 </TouchableOpacity>
                             </View>

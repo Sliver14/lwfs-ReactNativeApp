@@ -1,7 +1,6 @@
 import TabBarButton from '@/components/TabBarButton';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useTheme } from '@react-navigation/native';
-import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
 export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -49,7 +48,7 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               onLongPress={onLongPress}
               isFocused={isFocused}
               routeName={route.name}
-              color={isFocused ? '#4A90E2' : '#657786'}
+              color={isFocused ? '#453ace' : '#657786'}
               label={label}
             />
           );

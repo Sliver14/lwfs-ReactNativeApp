@@ -1,12 +1,12 @@
 // src/context/UserCartContext.tsx
 // This context is for a React Native application
 
-import axios, { AxiosError } from "axios";
-import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import axios from "axios";
 import * as SecureStore from 'expo-secure-store'; // For secure token storage in React Native
+import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
-import { useUser } from "./UserContext"; // Make sure this path is correct
 import { API_URL } from '@/utils/env'; // Ensure API_URL points to your Next.js backend (e.g., 'http://192.168.1.xxx:3000')
+import { useUser } from "./UserContext"; // Make sure this path is correct
 
 // Define a basic Product interface if you don't have one globally
 interface Product {
@@ -18,7 +18,7 @@ interface Product {
 }
 
 interface CartItem {
-    id: number; // This is the ID of the cart item entry itself in your DB
+    id: string; // This is the ID of the cart item entry itself in your DB (UUID)
     productId: number; // This is the ID of the product
     quantity: number;
     product: {
@@ -39,7 +39,7 @@ interface UserCartContextType {
     addToCart: (product: Product) => Promise<void>; // <--- New: Add to Cart function
     increaseItemQuantity: (productId: number) => Promise<void>;
     decreaseItemQuantity: (productId: number) => Promise<void>;
-    removeCartItemById: (cartItemId: number) => Promise<void>;
+    removeCartItemById: (cartItemId: string) => Promise<void>;
     clearUserCart: () => Promise<void>;
 }
 
@@ -152,6 +152,16 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
 
+        // Optimistically update local state first
+        setCart(prevCart => ({
+            ...prevCart,
+            cartItems: prevCart.cartItems.map(item => 
+                item.productId === productId 
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            )
+        }));
+
         try {
             const response = await axios.patch(`${API_URL}/cart/increase`, { productId }, {
                 headers: {
@@ -159,10 +169,10 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            setCart(response.data);
-            await fetchUserCart();
             console.log("Increased quantity for product:", productId, response.data);
         } catch (error: unknown) {
+            // Revert optimistic update on error
+            await fetchUserCart();
             console.error("Error increasing item quantity for product:", productId);
             if (axios.isAxiosError(error)) {
                 console.error("Axios error:", error.response?.data || error.message);
@@ -181,6 +191,16 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
             return;
         }
 
+        // Optimistically update local state first
+        setCart(prevCart => ({
+            ...prevCart,
+            cartItems: prevCart.cartItems.map(item => 
+                item.productId === productId 
+                    ? { ...item, quantity: Math.max(0, item.quantity - 1) }
+                    : item
+            ).filter(item => item.quantity > 0) // Remove items with quantity 0
+        }));
+
         try {
             const response = await axios.patch(`${API_URL}/cart/decrease`, { productId }, {
                 headers: {
@@ -188,10 +208,10 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            setCart(response.data);
-            await fetchUserCart();
             console.log("Decreased quantity for product:", productId, response.data);
         } catch (error: unknown) {
+            // Revert optimistic update on error
+            await fetchUserCart();
             console.error("Error decreasing item quantity for product:", productId);
             if (axios.isAxiosError(error)) {
                 console.error("Axios error:", error.response?.data || error.message);
@@ -203,7 +223,7 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [fetchUserCart]);
 
-    const removeCartItemById = useCallback(async (cartItemId: number) => {
+    const removeCartItemById = useCallback(async (cartItemId: string) => {
         const token = await getAuthToken();
         if (!token) {
             console.warn("Remove Item: No authentication token found.");

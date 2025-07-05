@@ -1,10 +1,10 @@
 // components/cart/CartItem.tsx
+import { useUserCart } from '@/contexts/UserCartContext'; // Import useUserCart
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { CartItem as CartItemType } from '../../types';
 import { Card } from '../shared/Card';
-import { useUserCart } from '@/contexts/UserCartContext'; // Import useUserCart
 
 interface CartItemProps {
     item: CartItemType;
@@ -20,29 +20,22 @@ const getIconComponent = (iconName: string) => {
     return iconMap[iconName] || Feather;
 };
 
-export const CartItemComponent: React.FC<CartItemProps> = ({ item }) => {
+const CartItemComponentInternal: React.FC<CartItemProps> = ({ item }) => {
     const { increaseItemQuantity, decreaseItemQuantity, removeCartItemById } = useUserCart();
     const product = item.product;
     const IconComponent = getIconComponent(item.iconName);
 
-    const handleIncreaseQuantity = () => {
+    const handleIncreaseQuantity = React.useCallback(() => {
         if (product?.id) {
             increaseItemQuantity(product.id);
         }
-    };
+    }, [product?.id, increaseItemQuantity]);
 
-    const handleDecreaseQuantity = () => {
+    const handleDecreaseQuantity = React.useCallback(() => {
         if (product?.id) {
             decreaseItemQuantity(product.id);
-            // Only decrease if quantity is greater than 1, otherwise remove the item
-            // if (item.quantity > 1) {
-            //     decreaseItemQuantity(product.id);
-            // } else {
-            //     // If quantity is 1 and decreased, remove the item entirely
-            //     removeCartItemById(item.id);
-            // }
         }
-    };
+    }, [product?.id, decreaseItemQuantity]);
 
     return (
         <Card className="flex-row items-center p-4 gap-4" style={{ marginBottom: 8 }}>
@@ -76,3 +69,6 @@ export const CartItemComponent: React.FC<CartItemProps> = ({ item }) => {
         </Card>
     );
 };
+
+// Export with React.memo to prevent unnecessary re-renders
+export const CartItemComponent = React.memo(CartItemComponentInternal);

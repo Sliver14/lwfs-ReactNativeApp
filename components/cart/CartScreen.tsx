@@ -1,11 +1,11 @@
 // components/cart/CartScreen.tsx
+import { useUserCart } from '@/contexts/UserCartContext';
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View, StyleSheet, Animated } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SwipeListView } from 'react-native-swipe-list-view';
 import { Card } from '../shared/Card';
 import { CartItemComponent } from './CartItem';
-import { useUserCart } from '@/contexts/UserCartContext';
-import { SwipeListView } from 'react-native-swipe-list-view';
 
 interface CartScreenProps {
     onBack: () => void;
@@ -41,16 +41,20 @@ export const CartScreen: React.FC<CartScreenProps> = ({
         }
     };
 
-    const deleteRow = (rowMap: any, rowKey: string) => {
+    const deleteRow = (rowMap: any, rowKey: string, cartItemId: string) => {
         closeRow(rowMap, rowKey);
-        removeCartItemById(parseInt(rowKey));
+        if (cartItemId && cartItemId.trim() !== '') {
+            removeCartItemById(cartItemId);
+        } else {
+            console.error("Invalid cart item ID:", cartItemId);
+        }
     };
 
     const renderHiddenItem = (data: any, rowMap: any) => (
         <View style={styles.rowBack}>
             <TouchableOpacity
                 style={[styles.backRightBtn, styles.backRightBtnRight]}
-                onPress={() => deleteRow(rowMap, data.item.id.toString())}
+                onPress={() => deleteRow(rowMap, data.item.id.toString(), data.item.id)}
             >
                 <Feather name="trash-2" size={25} color="white" />
             </TouchableOpacity>
