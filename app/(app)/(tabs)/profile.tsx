@@ -6,17 +6,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from "expo-router";
 import React, { useState } from 'react';
 import {
-  Alert,
-  Animated,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    Animated,
+    Modal,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useUser } from "../../../contexts/UserContext";
 
@@ -114,7 +114,10 @@ const QuickSettings: React.FC = () => {
   });
 
   const updateSetting = (key: keyof typeof settings, value: boolean) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    // Only allow updates for non-disabled settings
+    if (key !== 'notifications' && key !== 'darkMode') {
+      setSettings(prev => ({ ...prev, [key]: value }));
+    }
   };
 
   return (
@@ -130,16 +133,28 @@ const QuickSettings: React.FC = () => {
     }}>
       <Text className="font-semibold text-lg text-gray-900 mb-4" style={{ fontWeight: '600' }}>Quick Settings</Text>
       <View className="space-y-1">
-        <ToggleSwitch
-          label="Notifications"
-          value={settings.notifications}
-          onValueChange={(value) => updateSetting('notifications', value)}
-        />
-        <ToggleSwitch
-          label="Dark Mode"
-          value={settings.darkMode}
-          onValueChange={(value) => updateSetting('darkMode', value)}
-        />
+        <View className="flex-row items-center justify-between py-3 opacity-50">
+          <Text className="text-gray-500 font-medium" style={{ fontWeight: '500' }}>Notifications</Text>
+          <Switch
+            value={settings.notifications}
+            onValueChange={() => {}} // Disabled
+            trackColor={{ false: '#E1E8ED', true: '#E1E8ED' }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#E1E8ED"
+            disabled={true}
+          />
+        </View>
+        <View className="flex-row items-center justify-between py-3 opacity-50">
+          <Text className="text-gray-500 font-medium" style={{ fontWeight: '500' }}>Dark Mode</Text>
+          <Switch
+            value={settings.darkMode}
+            onValueChange={() => {}} // Disabled
+            trackColor={{ false: '#E1E8ED', true: '#E1E8ED' }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#E1E8ED"
+            disabled={true}
+          />
+        </View>
       </View>
     </View>
   );
@@ -195,11 +210,36 @@ const MenuOptions: React.FC<{
   setModalVisible: (visible: boolean) => void;
 }> = ({ router, setModalVisible }) => {
   const menuItems = [
-    { icon: 'bag-outline', label: 'Order History', onPress: () => router.push('/OrderHistory') },
-    { icon: 'lock-closed-outline', label: 'Change Password', onPress: () => setModalVisible(true) },
-    { icon: 'person-outline', label: 'Personal Information', onPress: () => router.push('/PersonalInfoScreen') },
-    { icon: 'help-circle-outline', label: 'Help & Support', onPress: () => {} },
-    { icon: 'information-circle-outline', label: 'About', onPress: () => {} },
+    { 
+      icon: 'bag-outline', 
+      label: 'Order History', 
+      onPress: undefined, // Disabled
+      disabled: true 
+    },
+    { 
+      icon: 'lock-closed-outline', 
+      label: 'Change Password', 
+      onPress: () => setModalVisible(true),
+      disabled: false 
+    },
+    { 
+      icon: 'person-outline', 
+      label: 'Personal Information', 
+      onPress: () => router.push('/PersonalInfoScreen'),
+      disabled: false 
+    },
+    { 
+      icon: 'help-circle-outline', 
+      label: 'Help & Support', 
+      onPress: undefined, // Disabled
+      disabled: true 
+    },
+    { 
+      icon: 'information-circle-outline', 
+      label: 'About', 
+      onPress: undefined, // Disabled
+      disabled: true 
+    },
   ];
 
   return (
@@ -214,13 +254,35 @@ const MenuOptions: React.FC<{
       borderColor: '#E1E8ED'
     }}>
       {menuItems.map((item, index) => (
-        <MenuOption
-          key={index}
-          icon={item.icon}
-          label={item.label}
-          onPress={item.onPress}
-          showBorder={index < menuItems.length - 1}
-        />
+        <View key={index} style={{ opacity: item.disabled ? 0.5 : 1 }}>
+          <TouchableOpacity
+            className={`flex-row items-center space-x-3 p-3 rounded-xl ${
+              index < menuItems.length - 1 ? 'border-b border-gray-50' : ''
+            }`}
+            onPress={item.onPress}
+            activeOpacity={item.disabled ? 1 : 0.7}
+            disabled={item.disabled}
+          >
+            <View className="w-8 h-8 items-center justify-center">
+              <Ionicons 
+                name={item.icon as any} 
+                size={20} 
+                color={item.disabled ? "#A0A0A0" : "#657786"} 
+              />
+            </View>
+            <Text 
+              className={`font-medium flex-1 ${item.disabled ? 'text-gray-400' : 'text-gray-700'}`} 
+              style={{ fontWeight: '500' }}
+            >
+              {item.label}
+            </Text>
+            <Ionicons 
+              name="chevron-forward-outline" 
+              size={16} 
+              color={item.disabled ? "#A0A0A0" : "#E1E8ED"} 
+            />
+          </TouchableOpacity>
+        </View>
       ))}
     </View>
   );

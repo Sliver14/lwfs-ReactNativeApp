@@ -9,7 +9,7 @@ interface UserDetails {
     lastName: string;
     email: string;
     zone: string;
-    // profileImage?: string; // Added to match PersonalInfoScreen
+    profileImage?: string; // Added to match PersonalInfoScreen
 }
 
 interface UserContextType {

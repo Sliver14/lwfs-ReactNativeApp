@@ -1,11 +1,12 @@
 import { useUser } from '@/contexts/UserContext';
+import { API_URL } from '@/utils/env';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -46,7 +47,7 @@ export default function PersonalInfoScreen() {
         zone: 'Zone'
     };
 
-    const handleInputChange = (key, value) => {
+    const handleInputChange = (key: string, value: string) => {
         setForm((prev) => ({ ...prev, [key]: value }));
     };
 
@@ -76,19 +77,19 @@ export default function PersonalInfoScreen() {
         }
     };
 
-    const uploadImageToServer = async (uri) => {
+    const uploadImageToServer = async (uri: string) => {
         const fileInfo = await FileSystem.getInfoAsync(uri);
         const fileName = uri.split('/').pop();
 
         const formData = new FormData();
         formData.append('file', {
             uri,
-            name: fileName,
+            name: fileName || 'image.jpg',
             type: 'image/jpeg',
-        });
+        } as any);
 
         try {
-            const res = await axios.post('https://your-api.com/upload-image', formData, {
+            const res = await axios.post(`${API_URL}/upload-image`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -113,7 +114,7 @@ export default function PersonalInfoScreen() {
         ]).start();
 
         try {
-            const res = await axios.post('https://your-api.com/update-profile', {
+            const res = await axios.post(`${API_URL}/update-profile`, {
                 ...form,
                 profileImage,
             });
@@ -122,7 +123,12 @@ export default function PersonalInfoScreen() {
                 Alert.alert('Success!', 'Your profile has been updated successfully', [
                     { text: 'OK', style: 'default' }
                 ]);
-                setUserDetails({ ...userDetails, ...form, profileImage });
+                setUserDetails({ 
+                    ...userDetails, 
+                    ...form, 
+                    profileImage,
+                    id: userDetails?.id || ''
+                });
                 setIsEditing(false);
             }
         } catch (err) {
@@ -165,15 +171,17 @@ export default function PersonalInfoScreen() {
                             <View className="w-32 h-32 rounded-full bg-white/20 items-center justify-center shadow-lg">
                                 {imageLoading ? (
                                     <ActivityIndicator size="large" color="white" />
-                                ) : (
+                                ) : profileImage ? (
                                     <Image
-                                        source={{
-                                            uri: profileImage || 'https://res.cloudinary.com/dfi8bpolg/image/upload/v1736329280/samples/man-portrait.jpg'
-                                        }}
+                                        source={{ uri: profileImage }}
                                         className="w-28 h-28 rounded-full"
                                         onLoadStart={() => setImageLoading(true)}
                                         onLoadEnd={() => setImageLoading(false)}
                                     />
+                                ) : (
+                                    <View className="w-28 h-28 rounded-full bg-white/30 items-center justify-center">
+                                        <Ionicons name="person" size={60} color="white" />
+                                    </View>
                                 )}
                             </View>
                             <TouchableOpacity
