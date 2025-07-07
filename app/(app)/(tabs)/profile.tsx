@@ -116,7 +116,7 @@ const QuickSettings: React.FC = () => {
   const updateSetting = (key: keyof typeof settings, value: boolean) => {
     // Only allow updates for non-disabled settings
     if (key !== 'notifications' && key !== 'darkMode') {
-      setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings(prev => ({ ...prev, [key]: value }));
     }
   };
 
@@ -259,7 +259,7 @@ const MenuOptions: React.FC<{
             className={`flex-row items-center space-x-3 p-3 rounded-xl ${
               index < menuItems.length - 1 ? 'border-b border-gray-50' : ''
             }`}
-            onPress={item.onPress}
+          onPress={item.onPress}
             activeOpacity={item.disabled ? 1 : 0.7}
             disabled={item.disabled}
           >
@@ -280,7 +280,7 @@ const MenuOptions: React.FC<{
               name="chevron-forward-outline" 
               size={16} 
               color={item.disabled ? "#A0A0A0" : "#E1E8ED"} 
-            />
+        />
           </TouchableOpacity>
         </View>
       ))}

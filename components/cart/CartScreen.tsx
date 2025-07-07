@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingLeft: 15,
         borderRadius: 8,
-        marginVertical: 4,
+        overflow: 'hidden',
     },
     backRightBtn: {
         alignItems: 'center',
@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         width: 75,
+        overflow: 'hidden',
     },
     backRightBtnRight: {
         backgroundColor: '#FF6347',

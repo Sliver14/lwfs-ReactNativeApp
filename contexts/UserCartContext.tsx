@@ -202,6 +202,12 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
     }, [fetchUserCart]);
 
     const removeCartItemById = useCallback(async (cartItemId: string) => {
+        // Optimistically update local state first
+        setCart((prevCart) => ({
+            ...prevCart,
+            cartItems: prevCart.cartItems.filter((item) => item.id !== cartItemId),
+        }));
+
         const token = await getAuthToken();
         if (!token) {
             console.warn("Remove Item: No authentication token found.");
@@ -215,12 +221,10 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
                 },
                 data: { cartItemId: cartItemId }
             });
-            setCart((prevCart) => ({
-                ...prevCart,
-                cartItems: prevCart.cartItems.filter((item) => item.id !== cartItemId),
-            }));
             console.log("Removed cart item with ID:", cartItemId);
         } catch (error: unknown) {
+            // Revert optimistic update on error by re-fetching cart
+            await fetchUserCart();
             console.error("Error removing item with ID:", cartItemId);
             if (axios.isAxiosError(error)) {
                 console.error("Axios error:", error.response?.data || error.message);
@@ -230,7 +234,7 @@ export const UserCartProvider = ({ children }: { children: ReactNode }) => {
                 console.error("Unknown error:", error);
             }
         }
-    }, []);
+    }, [fetchUserCart]);
 
     const clearUserCart = useCallback(async () => {
         const token = await getAuthToken();

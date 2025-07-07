@@ -4,7 +4,6 @@ import { Feather, MaterialIcons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { CartItem as CartItemType } from '../../types';
-import { Card } from '../shared/Card';
 
 interface CartItemProps {
     item: CartItemType;
@@ -39,7 +38,7 @@ const CartItemComponentInternal: React.FC<CartItemProps> = ({ item }) => {
     }, [product?.id, decreaseItemQuantity]);
 
     return (
-        <Card className="flex-row items-center p-4 gap-4 mb-2">
+        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 8, backgroundColor: 'white', gap: 16 }}>
             <View className="w-16 h-16 bg-gray-100 rounded-lg items-center justify-center">
                 <Image
                     source={{ uri: product?.imageUrl }}
@@ -47,11 +46,11 @@ const CartItemComponentInternal: React.FC<CartItemProps> = ({ item }) => {
                     resizeMode="cover"
                 />
             </View>
-            <View className="flex-1">
+            <View style={{ flex: 1 }}>
                 <Text className="font-semibold text-base text-gray-800 mb-1">{product?.name}</Text>
                 <Text className="font-bold text-[#453ace] text-sm">{product?.price} Espees</Text>
             </View>
-            <View className="flex-row items-center gap-2">
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <TouchableOpacity
                     className="p-1 bg-gray-100 rounded-full w-8 h-8 items-center justify-center"
                     onPress={handleDecreaseQuantity}
@@ -67,7 +66,7 @@ const CartItemComponentInternal: React.FC<CartItemProps> = ({ item }) => {
                 </TouchableOpacity>
             </View>
             {/* The trash icon is removed from here as it's now part of the swipe action */}
-        </Card>
+        </View>
     );
 };
 

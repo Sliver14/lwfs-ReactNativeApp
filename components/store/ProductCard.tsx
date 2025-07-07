@@ -63,7 +63,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onPress, onAd
                         {isAddingToCart ? (
                             <ActivityIndicator size="small" color="white" />
                         ) : (
-                            <Text className="text-white text-xs font-medium">Add</Text>
+                        <Text className="text-white text-xs font-medium">Add</Text>
                         )}
                     </TouchableOpacity>
                 </View>

@@ -7,10 +7,10 @@ module.exports = {
         slug: "lwfs_app",
         version: "1.0.0",
         orientation: "portrait",
-        icon: "./assets/images/icon.png",
+        icon: "./assets/images/splash-icon.png",
         userInterfaceStyle: "light",
         splash: {
-            image: "./assets/images/welcome/Logo-shadow.png",
+            image: "./assets/images/splash-icon.png",
             resizeMode: "contain",
             backgroundColor: "#ffffff"
         },
